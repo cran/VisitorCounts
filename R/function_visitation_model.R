@@ -79,104 +79,120 @@
 
 
 visitation_model <- function(onsite_usage,
-                   popularity_proxy = NULL,
-                   suspected_periods = c(12,6,4,3),
-                   proportion_of_variance_type = c("leave_out_first", "total"),
-                   max_proportion_of_variance = 0.995,
-                   log_ratio_cutoff = 0.2,
-                   window_length = "auto",
-                   num_trend_components = 2,
-                   criterion = c("cross-correlation","MSE","rank"),
-                   possible_lags = -36:36,
-                   leave_off = 6,
-                   estimated_change = 0,
-                   order_of_polynomial_approximation = 7,
-                   order_of_derivative = 1,
-                   ref_series = NULL,
-                   beta = "estimate",
-                   constant = 0,
-                   log_scale = TRUE,
-                   spline = FALSE,
-                   parameter_estimates = c("separate","joint"),
-                   omit_trend = TRUE,
-                   ...){
+                             popularity_proxy = NULL,
+                             suspected_periods = c(12,6,4,3),
+                             proportion_of_variance_type = c("leave_out_first", "total"),
+                             max_proportion_of_variance = 0.995,
+                             log_ratio_cutoff = 0.2,
+                             window_length = "auto",
+                             num_trend_components = 2,
+                             criterion = c("cross-correlation","MSE","rank"),
+                             possible_lags = -36:36,
+                             leave_off = 6,
+                             estimated_change = 0,
+                             order_of_polynomial_approximation = 7,
+                             order_of_derivative = 1,
+                             ref_series = NULL,
+                             beta = "estimate",
+                             constant = 0,
+                             log_scale = TRUE,
+                             spline = FALSE,
+                             parameter_estimates = c("separate","joint"),
+                             omit_trend = TRUE,
+                             ...){
 
- # replace negative infinities with an appropriate value using robust normal approximation
- negative_infs_onsite_usage <- as.numeric(onsite_usage == -Inf)
- negative_inf_loc_onsite_usage <- which(onsite_usage == -Inf)
- ratio_negative_infs_onsite_usage <- mean(negative_infs_onsite_usage)
- if(sum(negative_infs_onsite_usage) > 0){
-   exp_onsite_usage <- exp(onsite_usage)
-   exp_Qs_onsite_usage <- quantile(exp_onsite_usage, probs=c(0.25,0.5,0.75))
-   center_onsite_usage <- log(exp_Qs_onsite_usage)[2]
-   IQR_onsite_usage <- log(exp_Qs_onsite_usage)[3] - log(exp_Qs_onsite_usage)[1]
-   sd_onsite_usage <- IQR_onsite_usage/(qnorm(0.75)-qnorm(0.25))
-   min_onsite_usage <- min(onsite_usage[-negative_inf_loc_onsite_usage])
-   candidate_onsite_usage <- qnorm(ratio_negative_infs_onsite_usage/2, mean=center_onsite_usage, sd=sd_onsite_usage)
-   replace_onsite_usage <- min(min_onsite_usage, candidate_onsite_usage)
-   onsite_usage[negative_inf_loc_onsite_usage] <- replace_onsite_usage
- }
+  # replace negative infinities with an appropriate value using robust normal approximation
 
- if(!is.null(ref_series)){
-   negative_infs_ref_series <- as.numeric(ref_series == -Inf)
-   negative_inf_loc_ref_series <- which(ref_series == -Inf)
-   ratio_negative_infs_ref_series <- mean(negative_infs_ref_series)
-   if(sum(negative_infs_ref_series) > 0){
-     exp_ref_series <- exp(ref_series)
-     exp_Qs_ref_series <- quantile(exp_ref_series, probs=c(0.25,0.5,0.75))
-     center_ref_series <- log(exp_Qs_ref_series)[2]
-     IQR_ref_series <- log(exp_Qs_ref_series)[3] - log(exp_Qs_ref_series)[1]
-     sd_ref_series <- IQR_ref_series/(qnorm(0.75)-qnorm(0.25))
-     min_ref_series <- min(ref_series[-negative_inf_loc_ref_series])
-     candidate_ref_series <- qnorm(ratio_negative_infs_ref_series/2, mean=center_ref_series, sd=sd_ref_series)
-     replace_ref_series <- min(min_ref_series, candidate_ref_series)
-     ref_series[negative_inf_loc_ref_series] <- replace_ref_series
-   }
- }
-
- arguments <- c(as.list(environment()), list(...))
-
- do.call(check_arguments,arguments)
-
- # decompose onsite_usage time series ------------------------------------------------------------------
- arguments[["onsite_usage_decomposition"]] <- auto_decompose(time_series = onsite_usage,
-                                      suspected_periods = suspected_periods,
-                                      proportion_of_variance_type = proportion_of_variance_type,
-                                      max_proportion_of_variance = max_proportion_of_variance,
-                                      log_ratio_cutoff = log_ratio_cutoff,
-                                      window_length = window_length,
-                                      num_trend_components = num_trend_components)
+  if(sum(na.omit(onsite_usage) == -Inf) > 0)
+  {
+    negative_infs_onsite_usage <- as.numeric(onsite_usage == -Inf)
+    negative_inf_loc_onsite_usage <- which((onsite_usage == -Inf) == TRUE)
+    ratio_negative_infs_onsite_usage <- mean(negative_infs_onsite_usage, na.rm = TRUE)
+    if(sum(negative_infs_onsite_usage, na.rm = TRUE) > 0){
+      exp_onsite_usage <- exp(onsite_usage)
+      exp_Qs_onsite_usage <- quantile(exp_onsite_usage, probs=c(0.25,0.5,0.75))
+      if((exp_Qs_onsite_usage)[1]==0)
+      {
+        stop("Too many negative infinities in onsite_usage.")
+      }
+      center_onsite_usage <- log(exp_Qs_onsite_usage)[2]
+      IQR_onsite_usage <- log(exp_Qs_onsite_usage)[3] - log(exp_Qs_onsite_usage)[1]
+      sd_onsite_usage <- IQR_onsite_usage/(qnorm(0.75)-qnorm(0.25))
+      min_onsite_usage <- min(onsite_usage[-negative_inf_loc_onsite_usage], na.rm = TRUE)
+      candidate_onsite_usage <- qnorm(ratio_negative_infs_onsite_usage/2, mean=center_onsite_usage, sd=sd_onsite_usage)
+      replace_onsite_usage <- min(min_onsite_usage, candidate_onsite_usage, na.rm = TRUE)
+      onsite_usage[negative_inf_loc_onsite_usage] <- replace_onsite_usage
+    }
+  }
 
 
- # decompose proxy for popularity of social media ------------------------------------------------------
- if(omit_trend == FALSE){
-   arguments[["popularity_proxy_decomposition_data"]] <- do.call(decompose_proxy,arguments)
- }else{
-   arguments[["popularity_proxy_decomposition_data"]] <- list(forecasts_needed = 0, lag_estimate = list(lag = 0))
- }
+  if(!is.null(ref_series)){
+    if(sum(na.omit(ref_series) == -Inf) > 0)
+    {
+      negative_infs_ref_series <- as.numeric(ref_series == -Inf)
+      negative_inf_loc_ref_series <- which((ref_series == -Inf) == TRUE)
+      ratio_negative_infs_ref_series <- mean(negative_infs_ref_series, na.rm = TRUE)
+      if(sum(negative_infs_ref_series, na.rm = TRUE) > 0){
+        exp_ref_series <- exp(ref_series)
+        exp_Qs_ref_series <- quantile(exp_ref_series, probs=c(0.25,0.5,0.75))
+        if((exp_Qs_ref_series)[1]==0)
+        {
+          stop("Too many negative infinities in ref_series.")
+        }
+        center_ref_series <- log(exp_Qs_ref_series)[2]
+        IQR_ref_series <- log(exp_Qs_ref_series)[3] - log(exp_Qs_ref_series)[1]
+        sd_ref_series <- IQR_ref_series/(qnorm(0.75)-qnorm(0.25))
+        min_ref_series <- min(ref_series[-negative_inf_loc_ref_series], na.rm = TRUE)
+        candidate_ref_series <- qnorm(ratio_negative_infs_ref_series/2, mean=center_ref_series, sd=sd_ref_series)
+        replace_ref_series <- min(min_ref_series, candidate_ref_series, na.rm = TRUE)
+        ref_series[negative_inf_loc_ref_series] <- replace_ref_series
+      }
+    }
+  }
+
+  arguments <- c(as.list(environment()), list(...))
+
+  do.call(check_arguments,arguments)
+
+  # decompose onsite_usage time series ------------------------------------------------------------------
+  arguments[["onsite_usage_decomposition"]] <- auto_decompose(time_series = onsite_usage,
+                                                              suspected_periods = suspected_periods,
+                                                              proportion_of_variance_type = proportion_of_variance_type,
+                                                              max_proportion_of_variance = max_proportion_of_variance,
+                                                              log_ratio_cutoff = log_ratio_cutoff,
+                                                              window_length = window_length,
+                                                              num_trend_components = num_trend_components)
 
 
- # estimate beta and constant parameters ---------------------------------------------------------------
- arguments[["parameter_estimates_and_time_series_windows"]] <- do.call(estimate_parameters,arguments)
+  # decompose proxy for popularity of social media ------------------------------------------------------
+  if(omit_trend == FALSE){
+    arguments[["popularity_proxy_decomposition_data"]] <- do.call(decompose_proxy,arguments)
+  }else{
+    arguments[["popularity_proxy_decomposition_data"]] <- list(forecasts_needed = 0, lag_estimate = list(lag = 0))
+  }
 
 
- # obtain fitted values of model ------------------------------------------------------------------------
- fitted_values <- do.call(fit_model,arguments)
+  # estimate beta and constant parameters ---------------------------------------------------------------
+  arguments[["parameter_estimates_and_time_series_windows"]] <- do.call(estimate_parameters,arguments)
 
 
- return(new_visitation_model(visitation_fit = fitted_values,
-                             differenced_fit = diff(fitted_values),
-                             beta = as.numeric(arguments$parameter_estimates_and_time_series_windows$beta),
-                             constant = as.numeric(exp(arguments$parameter_estimates_and_time_series_windows$constant)),
-                             proxy_decomposition = arguments$popularity_proxy_decomposition_data$proxy_decomposition,
-                             onsite_usage_decomposition = arguments$onsite_usage_decomposition,
-                             forecasts_needed = arguments$popularity_proxy_decomposition_data$forecasts_needed,
-                             lag_estimate = arguments$popularity_proxy_decomposition_data$lag_estimate,
-                             criterion = criterion,
-                             ref_series = ref_series,
-                             omit_trend = omit_trend,
-                             call = match.call())
- )
+  # obtain fitted values of model ------------------------------------------------------------------------
+  fitted_values <- do.call(fit_model,arguments)
+
+
+  return(new_visitation_model(visitation_fit = fitted_values,
+                              differenced_fit = diff(fitted_values),
+                              beta = as.numeric(arguments$parameter_estimates_and_time_series_windows$beta),
+                              constant = as.numeric(exp(arguments$parameter_estimates_and_time_series_windows$constant)),
+                              proxy_decomposition = arguments$popularity_proxy_decomposition_data$proxy_decomposition,
+                              onsite_usage_decomposition = arguments$onsite_usage_decomposition,
+                              forecasts_needed = arguments$popularity_proxy_decomposition_data$forecasts_needed,
+                              lag_estimate = arguments$popularity_proxy_decomposition_data$lag_estimate,
+                              criterion = criterion,
+                              ref_series = ref_series,
+                              omit_trend = omit_trend,
+                              call = match.call())
+  )
 
 }
 
@@ -248,12 +264,12 @@ decompose_proxy <- function(onsite_usage,
                             ...){
 
   proxy_decomposition <- auto_decompose(time_series = popularity_proxy,
-                                         suspected_periods = suspected_periods,
-                                         proportion_of_variance_type = proportion_of_variance_type,
-                                         max_proportion_of_variance = max_proportion_of_variance,
-                                         log_ratio_cutoff = log_ratio_cutoff,
-                                         window_length = window_length,
-                                         num_trend_components = num_trend_components)
+                                        suspected_periods = suspected_periods,
+                                        proportion_of_variance_type = proportion_of_variance_type,
+                                        max_proportion_of_variance = max_proportion_of_variance,
+                                        log_ratio_cutoff = log_ratio_cutoff,
+                                        window_length = window_length,
+                                        num_trend_components = num_trend_components)
 
   proxy_trend <- proxy_decomposition$reconstruction$Trend
 
@@ -360,7 +376,7 @@ estimate_parameters <- function(popularity_proxy_decomposition_data = NULL,
                                 constant,
                                 parameter_estimates,
                                 ...
-                                ){
+){
 
   # If omit_trend == TRUE, time series window variables are replaced with variables obtained
   # during the popularity proxy decomposition.
@@ -469,7 +485,7 @@ fit_model <- function(parameter_estimates_and_time_series_windows,
                       omit_trend,
                       log_scale,
                       ...
-                      ){
+){
 
   constant <- parameter_estimates_and_time_series_windows$constant
   ts_trend_window <- parameter_estimates_and_time_series_windows$ts_trend_window

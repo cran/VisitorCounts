@@ -1,18 +1,20 @@
 Package: VisitorCounts
 Type: Package
 Title: Modeling and Forecasting Visitor Counts Using Social Media
-Version: 1.0.0
-Date: 2021-11-24
+Version: 1.0.1
+Date: 2022-4-19
 Authors@R: c(
         person("Russell", "Goebel", email = "rgoebel@bu.edu", role = "aut"),
         person("Robert", "Bowen", email = "robertbowen.bham@gmail.com", role = c("aut", "cre")),
         person("Beth Ann", "Brackett", email = "eliannkb@gmail.com", role = "ctb"),
-        person("Kimihiro", "Noguchi", email = "Kimihiro.noguchi@wwu.edu", role = "aut")
+        person("Kimihiro", "Noguchi", email = "Kimihiro.noguchi@wwu.edu", role = "aut"),
+        person("Dylan", "Way", email = "wayd2@wwu.edu", role="aut")
     )
 Author: Russell Goebel [aut],
   Robert Bowen [aut, cre],
   Beth Ann Brackett [ctb],
-  Kimihiro Noguchi [aut]
+  Kimihiro Noguchi [aut],
+  Dylan Way [aut]
 Maintainer: Robert Bowen <robertbowen.bham@gmail.com>
 Description: Performs modeling and forecasting of park visitor counts
 	using social media data and (partial) on-site visitor counts.
@@ -25,12 +27,12 @@ Description: Performs modeling and forecasting of park visitor counts
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.1.2
-Imports: Rssa, ggplot2, ggthemes, tibble, methods
+Imports: Rssa, methods
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 Depends: R (>= 2.10)
 LazyData: true
 NeedsCompilation: no
-Packaged: 2021-11-24 23:15:29 UTC; Robert
+Packaged: 2022-04-20 07:06:58 UTC; Robert
 Repository: CRAN
-Date/Publication: 2021-11-25 08:50:02 UTC
+Date/Publication: 2022-04-22 02:20:02 UTC

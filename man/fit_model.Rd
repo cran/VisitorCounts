@@ -7,6 +7,7 @@
 fit_model(
   parameter_estimates_and_time_series_windows,
   omit_trend,
+  trend,
   log_scale,
   ...
 )
@@ -14,7 +15,9 @@ fit_model(
 \arguments{
 \item{parameter_estimates_and_time_series_windows}{# a list storing the outputs of `estimate_parameters`, including parameter estimates `beta` and `constant` as well as data pertaining to time series windows.}
 
-\item{omit_trend}{A Boolean specifying whether or not to consider the trend component to be 0.}
+\item{omit_trend}{This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If}
+
+\item{trend}{A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.}
 
 \item{log_scale}{A Boolean specifying whether or not the results should be returned in the log scale.}
 

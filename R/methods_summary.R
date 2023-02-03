@@ -6,7 +6,7 @@
 #'
 #' @return A "decomposition" class object.
 #' @examples
-#'  data("park_visitation")
+#' data("park_visitation")
 #'
 #' park <- "YELL"
 #' nps_ts <- ts(park_visitation[park_visitation$park == park,]$nps, start = 2005, freq = 12)
@@ -54,8 +54,8 @@ summary.decomposition <- function(object,...){
 #' @examples
 #' #Example:
 #'
-#'data("park_visitation")
-#'data("flickr_userdays")
+#' data("park_visitation")
+#' data("flickr_userdays")
 #'
 #' n_ahead <- 12
 #' park <- "YELL"
@@ -69,9 +69,9 @@ summary.decomposition <- function(object,...){
 
 
 summary.visitation_forecast <- function(object,...){
-
   beta <- round(object$beta,3)
   constant <- round(object$constant,3)
+  slope <- round(object$slope,3)
   n_forecast <- object$n_ahead
   criterion <- object$criterion
   lag_estimate <- object$lag_estimate
@@ -82,7 +82,8 @@ summary.visitation_forecast <- function(object,...){
   cat(sprintf("%-20s %s","Parameter:","Estimate: \n"))
   cat(sprintf("%-20s %s","----------","--------- \n"))
   cat(sprintf("%-20s %s","Beta:",paste(beta,"\n")))
-  cat(sprintf("%-20s %s","Constant:",paste(constant,"\n")))
+  cat(sprintf("%-20s %s","Exp(Constant):",paste(constant,"\n")))
+  cat(sprintf("%-20s %s","Slope:",paste(slope,"\n")))
   cat(sprintf("%-20s %s","Lag:",paste(lag_estimate,"\n")))
   cat("=============================== \n")
   cat(paste("Criterion for Lag Estimate:",criterion,"\n"))
@@ -103,8 +104,8 @@ summary.visitation_forecast <- function(object,...){
 #' @examples
 #' #Example:
 #'
-#'data("park_visitation")
-#'data("flickr_userdays")
+#' data("park_visitation")
+#' data("flickr_userdays")
 #'
 #' n_ahead <- 12
 #' park <- "YELL"
@@ -119,10 +120,9 @@ summary.visitation_forecast <- function(object,...){
 summary.visitation_model <- function(object,...){
   beta <- round(object$beta,4)
   constant <- object$constant
+  slope <- round(object$slope,4)
   lag_estimate <- object$lag_estimate$lag
   criterion <- object$criterion
-
-
 
   cat("Call: "); print(object$call); cat("\n ")
   cat("Parameter Estimates: \n")
@@ -130,13 +130,11 @@ summary.visitation_model <- function(object,...){
   cat(sprintf("%-20s %s","Parameter:","Estimate: \n"))
   cat(sprintf("%-20s %s","----------","--------- \n"))
   cat(sprintf("%-20s %s","Beta:",paste(beta,"\n")))
-  cat(sprintf("%-20s %s","Constant:",paste(constant,"\n")))
+  cat(sprintf("%-20s %s","Exp(Constant):",paste(constant,"\n")))
+  cat(sprintf("%-20s %s","Slope:",paste(slope,"\n")))
   cat(sprintf("%-20s %s","Lag:",paste(lag_estimate,"\n")))
   cat(sprintf("%-20s %s","Lag Criterion:",paste(criterion,"\n")))
   cat("=============================== \n")
   invisible(object)
 
 }
-
-
-

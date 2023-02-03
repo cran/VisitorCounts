@@ -138,7 +138,6 @@ derivative_function <- function(model_coefficients,number_of_derivatives)
 #' VisitorCounts:::polynomial_approximation(trend,7)
 #' @noRd
 
-
 polynomial_approximation <- function(time_series,order_of_approximation)
 {
   n <- length(time_series)
@@ -147,5 +146,69 @@ polynomial_approximation <- function(time_series,order_of_approximation)
   return(lm_trend)
 }
 
+#' @title Imputation
+#' @description Imputation by replacing negative infinities with appropriate numbers.
+#' @export
+#' @param x A numeric vector (usually the log visitation counts or photo-user days).
+#'
+#' @return A numeric vector with the negative infinities replaced with appropriate numbers.
 
+imputation <- function(x)
+{
+  if(sum(na.omit(x) == -Inf) > 0)
+  {
+    negative_infs_x <- as.numeric(x == -Inf)
+    negative_inf_loc_x <- which((x == -Inf) == TRUE)
+    ratio_negative_infs_x <- mean(negative_infs_x, na.rm = TRUE)
+    if(sum(negative_infs_x, na.rm = TRUE) > 0){
+      exp_x <- exp(x)
+      exp_Qs_x <- quantile(exp_x, probs=c(0.25,0.5,0.75), na.rm = TRUE)
+      if((exp_Qs_x)[1]==0)
+      {
+        stop("Too many negative infinities in x.")
+      }
+      center_x <- log(exp_Qs_x)[2]
+      IQR_x <- log(exp_Qs_x)[3] - log(exp_Qs_x)[1]
+      sd_x <- IQR_x/(qnorm(0.75)-qnorm(0.25))
+      min_x <- min(x[-negative_inf_loc_x], na.rm = TRUE)
+      candidate_x <- qnorm(ratio_negative_infs_x/2, mean=center_x, sd=sd_x)
+      replace_x <- min(min_x, candidate_x, na.rm = TRUE)
+      x[negative_inf_loc_x] <- replace_x
+    }
+  }
+  return(x)
+}
+
+#' @title Converting Annual Counts into Monthly Counts
+#' @description Convert annual counts into monthly counts using photo-user-days.
+#' @export
+#' @param visitation_years A numeric vector with annual visitation counts. If not available, NA should be entered.
+#' @param pud A numeric vector for the monthly photo-user-days corresponding to \code{visitation_years}. As such, the length of \code{pud} needs to be exactly 12 times as long as \code{visitation_counts}.
+#'
+#' @return A numeric vector with estimated monthly visitation counts based on the annual counts and monthly photo-user-days.
+
+yearsToMonths <- function(visitation_years, pud) {
+  if(length(pud) != 12*length(visitation_years))
+  {
+    stop("The length of pud is not 12 times the length of visitation_years.")
+  }
+  visitation_months <- c()
+  pud.prob <- c()
+  for (i in 1:length(visitation_years))
+  {
+    if (is.na(visitation_years[i]))
+    {
+      visitation_months[((i-1)*12+1):(i*12)] <- rep(NA,12)
+    }
+    else
+    {
+      pud.prob <- pud[((i-1)*12+1):(i*12)]/sum(pud[((i-1)*12+1):(i*12)])
+      for (j in 1:12)
+      {
+        visitation_months[((i-1)*12+j)] <- pud.prob[j]*visitation_years[i]
+      }
+    }
+  }
+  return(visitation_months)
+}
 

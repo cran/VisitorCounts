@@ -18,10 +18,12 @@
 #' @param ref_series A numeric vector specifying the original visitation series in the log scale. The default option is NULL, implying that no such series is available. If such series is available, then its length must be the same as that of time_series.
 #' @param beta A numeric or a character string specifying the seasonality adjustment factor. The default option is "estimate", in which case, it is estimated by using the Fisher's z-transformed lag-12 autocorrelation. Even if an actual value is supplied, if ref_series is supplied, it is overwritten by the least squares estimate.
 #' @param constant A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. The default option is 0, implying that the time_series well represents the actual visitation counts, which is rarely the case. If ref_series is supplied, the constant is overwritten by the least squares estimate.
+#' @param slope A numeric specifying the slope coefficient in the model. This constant is applicable only when trend is set to "linear". The default option is 0, implying that the linear trend is absent.
 #' @param log_scale A Boolean specifying whether or not the results should be returned in the log scale. The default option is TRUE, in which case, the results are returned in the log scale.
 #' @param spline A Boolean specifying whether or not to use a smoothing spline for the lag estimation. This is relevant only when omit_trend is FALSE.
 #' @param parameter_estimates A character string specifying how to estimate beta and constant parameters should a reference series be supplied. Both options use least squares estimates, but "separate" indicates that the differenced series should be used to estimate beta separately from the constant, while "joint" indicates to estimate both using non-differenced detrended series.
-#' @param omit_trend A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0.
+#' @param omit_trend This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If
+#' @param trend A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.
 #' @param ... Additional arguments to be passed onto the smoothing spline (\code{smooth.spline}).
 #'
 #' @return
@@ -29,13 +31,15 @@
 #' \item{differenced_fit}{A vector storing differenced fitted values of visitation model. (Equal to \code{diff(visitation_fit)}.)}
 #' \item{beta}{A numeric storing the estimated seasonality adjustment factor.}
 #' \item{constant}{A numeric storing estimated constant term used in the model.}
+#' \item{slope}{A numeric storing estimated slope coefficient term used in the model.}
 #' \item{proxy_decomposition}{A "decomposition" object representing the automatic decomposition obtained from popularity_proxy (see auto_decompose())}
 #' \item{time_series_decomposition}{A "decomposition" object representing the automatic decomposition obtained from time_series (see auto_decompose())}
 #' \item{forecasts_needed}{An integer representing the number of forecasts of popularity_proxy needed to obtain all fitted values. Negative values indicate extra observations which may be useful for predictions.}
 #' \item{lag_estimate}{A list storing both the MSE-based estimate and Rank-based estimates for the lag.}
 #' \item{criterion}{A string; one of "cross-correlation", "MSE", or "rank", specifying the method used to select the appropriate lag.}
 #' \item{ref_series}{The reference series, if one was supplied.}
-#' \item{omit_trend}{Whether or not trend was considered 0 in the model.}
+#' \item{omit_trend}{Whether or not trend was considered 0 in the model. This is obsolete and is left only for compatibility.}
+#' \item{trend}{The trend used in the model.}
 #' \item{call}{The model call.}
 #'
 #' @seealso See \code{\link{predict.visitation_model}} for forecast methods, \code{\link{estimate_lag}} for details on the lag estimation, and \code{\link{auto_decompose}} for details on the automatic decomposition of time series using SSA. See the package \link[Rssa]{Rssa} for details regarding singular spectrum analysis.
@@ -56,18 +60,27 @@
 #' popularity_proxy <- log(flickr_userdays)
 #'
 #'
-#' ### fit two models ---------------
+#' ### fit three models ---------------
 #'
-#' vm_pud_only <- visitation_model(pud_ts,popularity_proxy = popularity_proxy, omit_trend = FALSE)
+#' vm_pud_linear <- visitation_model(pud_ts,
+#'                                   ref_series = nps_ts,
+#'                                   parameter_estimates = "joint",
+#'                                   trend = "linear")
+#' vm_pud_only <- visitation_model(pud_ts,
+#'                                 popularity_proxy = popularity_proxy,
+#'                                 trend = "estimated")
 #' vm_ref_series <- visitation_model(pud_ts,
-#'                                   popularity_proxy,
+#'                                   popularity_proxy = popularity_proxy,
 #'                                   ref_series = nps_ts,
 #'                                   parameter_estimates = "separate",
 #'                                   possible_lags = -36:36,
-#'                                   omit_trend = TRUE)
+#'                                   trend = "none")
 #'
 #'
 #' ### visualize fit ------------------
+#'
+#' plot(vm_pud_linear, ylim = c(-3,3), difference = TRUE)
+#' lines(diff(nps_ts), col = "red")
 #'
 #' plot(vm_pud_only, ylim = c(-3,3), difference = TRUE)
 #' lines(diff(nps_ts), col = "red")
@@ -95,11 +108,41 @@ visitation_model <- function(onsite_usage,
                              ref_series = NULL,
                              beta = "estimate",
                              constant = 0,
+                             slope = 0,
                              log_scale = TRUE,
                              spline = FALSE,
-                             parameter_estimates = c("separate","joint"),
+                             parameter_estimates = c("joint","separate"),
                              omit_trend = TRUE,
+                             trend = c("linear", "none", "estimated"),
                              ...){
+
+  # specifying a correct trend input argument. This is just for compatibility.
+
+  proportion_of_variance_type <- match.arg(proportion_of_variance_type)
+  criterion <- match.arg(criterion)
+  parameter_estimates <- match.arg(parameter_estimates)
+  trend <- match.arg(trend)
+
+  if(is.null(trend))
+  {
+    if(omit_trend == TRUE)
+    {
+      trend = "none"
+    }
+    if(omit_trend == FALSE)
+    {
+      trend = "estimated"
+    }
+  }
+
+  if(trend == "none")
+  {
+    omit_trend = TRUE
+  }
+  if(trend == "estimated")
+  {
+    omit_trend = FALSE
+  }
 
   # replace negative infinities with an appropriate value using robust normal approximation
 
@@ -165,12 +208,14 @@ visitation_model <- function(onsite_usage,
 
 
   # decompose proxy for popularity of social media ------------------------------------------------------
-  if(omit_trend == FALSE){
+  if(trend == "estimated")
+  {
     arguments[["popularity_proxy_decomposition_data"]] <- do.call(decompose_proxy,arguments)
-  }else{
+  }
+  else #trend == "none"||trend == "linear"
+  {
     arguments[["popularity_proxy_decomposition_data"]] <- list(forecasts_needed = 0, lag_estimate = list(lag = 0))
   }
-
 
   # estimate beta and constant parameters ---------------------------------------------------------------
   arguments[["parameter_estimates_and_time_series_windows"]] <- do.call(estimate_parameters,arguments)
@@ -184,6 +229,7 @@ visitation_model <- function(onsite_usage,
                               differenced_fit = diff(fitted_values),
                               beta = as.numeric(arguments$parameter_estimates_and_time_series_windows$beta),
                               constant = as.numeric(exp(arguments$parameter_estimates_and_time_series_windows$constant)),
+                              slope = arguments$parameter_estimates_and_time_series_windows$slope,
                               proxy_decomposition = arguments$popularity_proxy_decomposition_data$proxy_decomposition,
                               onsite_usage_decomposition = arguments$onsite_usage_decomposition,
                               forecasts_needed = arguments$popularity_proxy_decomposition_data$forecasts_needed,
@@ -191,6 +237,7 @@ visitation_model <- function(onsite_usage,
                               criterion = criterion,
                               ref_series = ref_series,
                               omit_trend = omit_trend,
+                              trend = trend,
                               call = match.call())
   )
 
@@ -216,10 +263,12 @@ visitation_model <- function(onsite_usage,
 #' @param ref_series A numeric vector specifying the original visitation series in the log scale. The default option is NULL, implying that no such series is available. If such series is available, then its length must be the same as that of time_series.
 #' @param beta A numeric or a character string specifying the seasonality adjustment factor. The default option is "estimate", in which case, it is estimated by using the Fisher's z-transformed lag-12 autocorrelation. Even if an actual value is supplied, if ref_series is supplied, it is overwritten by the least squares estimate.
 #' @param constant A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. The default option is 0, implying that the time_series well represents the actual visitation counts, which is rarely the case. If ref_series is supplied, the constant is overwritten by the least squares estimate.
+#' @param slope A numeric specifying the slope coefficient in the model. This constant is applicable only when trend is set to "linear". The default option is 0, implying that the linear trend is absent.
 #' @param log_scale A Boolean specifying whether or not the results should be returned in the log scale. The default option is TRUE, in which case, the results are returned in the log scale.
 #' @param spline A Boolean specifying whether or not to use a smoothing spline for the lag estimation. This is relevant only when omit_trend is FALSE.
 #' @param parameter_estimates A character string specifying how to estimate beta and constant parameters should a reference series be supplied. Both options use least squares estimates, but "separate" indicates that the differenced series should be used to estimate beta separately from the constant, while "joint" indicates to estimate both using non-differenced detrended series.
-#' @param omit_trend A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0.
+#' @param omit_trend This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If
+#' @param trend A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.
 #' @param onsite_usage_decomposition A "decomposition" class object containing decomposition data for the onsite usage time series (outputs from `auto_decompose`).
 #' @param ... Additional arguments to be passed onto the smoothing spline (\code{smooth.spline}).
 #'
@@ -232,11 +281,6 @@ visitation_model <- function(onsite_usage,
 #' \item{endtime}{A `tsp` attribute of a `ts` object representing the time of the final onsite usage observation.}
 #' \item{forecasts_needed}{An integer representing the number of forecasts of popularity_proxy needed to obtain all fitted values. Negative values indicate extra observations which may be useful for predictions.}
 #' \item{lag_estimate}{A list storing both the MSE-based esitmate and Rank-based estimates for the lag.}
-
-
-
-
-
 
 
 decompose_proxy <- function(onsite_usage,
@@ -256,12 +300,87 @@ decompose_proxy <- function(onsite_usage,
                             ref_series = NULL,
                             beta = "estimate",
                             constant = 0,
+                            slope = 0,
                             log_scale = TRUE,
                             spline = FALSE,
                             parameter_estimates = c("separate","joint"),
                             omit_trend = TRUE,
+                            trend = c("linear", "none", "estimated"),
                             onsite_usage_decomposition,
                             ...){
+
+  # specifying a correct trend input argument. This is just for compatibility.
+
+  if(is.null(trend))
+  {
+    if(omit_trend == TRUE)
+    {
+      trend = "none"
+    }
+    if(omit_trend == FALSE)
+    {
+      trend = "estimated"
+    }
+  }
+
+  if(trend == "none")
+  {
+    omit_trend = TRUE
+  }
+  if(trend == "estimated")
+  {
+    omit_trend = FALSE
+  }
+
+  # replace negative infinities with an appropriate value using robust normal approximation
+
+  if(sum(na.omit(onsite_usage) == -Inf) > 0)
+  {
+    negative_infs_onsite_usage <- as.numeric(onsite_usage == -Inf)
+    negative_inf_loc_onsite_usage <- which((onsite_usage == -Inf) == TRUE)
+    ratio_negative_infs_onsite_usage <- mean(negative_infs_onsite_usage, na.rm = TRUE)
+    if(sum(negative_infs_onsite_usage, na.rm = TRUE) > 0){
+      exp_onsite_usage <- exp(onsite_usage)
+      exp_Qs_onsite_usage <- quantile(exp_onsite_usage, probs=c(0.25,0.5,0.75))
+      if((exp_Qs_onsite_usage)[1]==0)
+      {
+        stop("Too many negative infinities in onsite_usage.")
+      }
+      center_onsite_usage <- log(exp_Qs_onsite_usage)[2]
+      IQR_onsite_usage <- log(exp_Qs_onsite_usage)[3] - log(exp_Qs_onsite_usage)[1]
+      sd_onsite_usage <- IQR_onsite_usage/(qnorm(0.75)-qnorm(0.25))
+      min_onsite_usage <- min(onsite_usage[-negative_inf_loc_onsite_usage], na.rm = TRUE)
+      candidate_onsite_usage <- qnorm(ratio_negative_infs_onsite_usage/2, mean=center_onsite_usage, sd=sd_onsite_usage)
+      replace_onsite_usage <- min(min_onsite_usage, candidate_onsite_usage, na.rm = TRUE)
+      onsite_usage[negative_inf_loc_onsite_usage] <- replace_onsite_usage
+    }
+  }
+
+
+  if(!is.null(ref_series)){
+    if(sum(na.omit(ref_series) == -Inf) > 0)
+    {
+      negative_infs_ref_series <- as.numeric(ref_series == -Inf)
+      negative_inf_loc_ref_series <- which((ref_series == -Inf) == TRUE)
+      ratio_negative_infs_ref_series <- mean(negative_infs_ref_series, na.rm = TRUE)
+      if(sum(negative_infs_ref_series, na.rm = TRUE) > 0){
+        exp_ref_series <- exp(ref_series)
+        exp_Qs_ref_series <- quantile(exp_ref_series, probs=c(0.25,0.5,0.75))
+        if((exp_Qs_ref_series)[1]==0)
+        {
+          stop("Too many negative infinities in ref_series.")
+        }
+        center_ref_series <- log(exp_Qs_ref_series)[2]
+        IQR_ref_series <- log(exp_Qs_ref_series)[3] - log(exp_Qs_ref_series)[1]
+        sd_ref_series <- IQR_ref_series/(qnorm(0.75)-qnorm(0.25))
+        min_ref_series <- min(ref_series[-negative_inf_loc_ref_series], na.rm = TRUE)
+        candidate_ref_series <- qnorm(ratio_negative_infs_ref_series/2, mean=center_ref_series, sd=sd_ref_series)
+        replace_ref_series <- min(min_ref_series, candidate_ref_series, na.rm = TRUE)
+        ref_series[negative_inf_loc_ref_series] <- replace_ref_series
+      }
+    }
+  }
+
 
   proxy_decomposition <- auto_decompose(time_series = popularity_proxy,
                                         suspected_periods = suspected_periods,
@@ -272,8 +391,6 @@ decompose_proxy <- function(onsite_usage,
                                         num_trend_components = num_trend_components)
 
   proxy_trend <- proxy_decomposition$reconstruction$Trend
-
-
 
   #estimate lag for trend
 
@@ -347,10 +464,12 @@ decompose_proxy <- function(onsite_usage,
 #' @param popularity_proxy_decomposition_data A "decomposition" class object containing decomposition data for the popularity proxy time series (outputs from `auto_decompose`).
 #' @param onsite_usage A vector which stores on-site usage in the log scale for a particular social media platform and recreational site.
 #' @param onsite_usage_decomposition A "decomposition" class object containing decomposition data for the onsite usage time series (outputs from `auto_decompose`).
-#' @param omit_trend A Boolean specifying whether or not to consider the trend component to be 0.
+#' @param omit_trend This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0.
+#' @param trend A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.
 #' @param ref_series A numeric vector specifying the original visitation series in the log scale.
 #' @param beta A numeric or a character string specifying the seasonality adjustment factor. The default option is "estimate", in which case, it is estimated by using the Fisher's z-transformed lag 12 autocorrelation. Even if an actual value is supplied, if ref_series is supplied, it is overwritten by the least squares estimate.
 #' @param constant A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. If ref_series is supplied, the constant is overwritten by the least squares estimate.
+#' @param slope A numeric specifying the slope coefficient in the model. This constant is applicable only when trend is set to "linear".
 #' @param parameter_estimates A character string specifying how to estimate beta and constant parameters should a reference series be supplied. Both options use least squares estimates, but "separate" indicates that the differenced series should be used to estimate beta separately from the constant, while "joint" indicates to estimate both using non-differenced detrended series.
 #' @param ... Additional arguments.
 #'
@@ -364,6 +483,7 @@ decompose_proxy <- function(onsite_usage,
 #' \item{endtime}{A `tsp` attribute of a `ts` object representing the time of the final onsite usage observation.}
 #' \item{beta}{A numeric storing the estimated seasonality adjustment factor.}
 #' \item{constant}{A numeric storing estimated constant term used in the model.}
+#' \item{slope}{A numeric storing the estimated slope term used in the model. Applicable when the trend parameter is "linear". Otherwise, NULL is returned.}
 
 
 
@@ -371,34 +491,107 @@ estimate_parameters <- function(popularity_proxy_decomposition_data = NULL,
                                 onsite_usage,
                                 onsite_usage_decomposition,
                                 omit_trend,
+                                trend,
                                 ref_series,
                                 beta,
                                 constant,
+                                slope,
                                 parameter_estimates,
                                 ...
 ){
 
-  # If omit_trend == TRUE, time series window variables are replaced with variables obtained
-  # during the popularity proxy decomposition.
-  if(omit_trend == TRUE)
-  {
+  # specifying a correct trend input argument. This is just for compatibility.
 
+  if(is.null(trend))
+  {
+    if(omit_trend == TRUE)
+    {
+      trend = "none"
+    }
+    if(omit_trend == FALSE)
+    {
+      trend = "estimated"
+    }
+  }
+
+  if(trend == "none")
+  {
+    omit_trend = TRUE
+  }
+  if(trend == "estimated")
+  {
+    omit_trend = FALSE
+  }
+
+  # replace negative infinities with an appropriate value using robust normal approximation
+
+  if(sum(na.omit(onsite_usage) == -Inf) > 0)
+  {
+    warning("Negative infinities in onsite_usage will be replaced with an estimated value.")
+    negative_infs_onsite_usage <- as.numeric(onsite_usage == -Inf)
+    negative_inf_loc_onsite_usage <- which((onsite_usage == -Inf) == TRUE)
+    ratio_negative_infs_onsite_usage <- mean(negative_infs_onsite_usage, na.rm = TRUE)
+    if(sum(negative_infs_onsite_usage, na.rm = TRUE) > 0){
+      exp_onsite_usage <- exp(onsite_usage)
+      exp_Qs_onsite_usage <- quantile(exp_onsite_usage, probs=c(0.25,0.5,0.75))
+      if((exp_Qs_onsite_usage)[1]==0)
+      {
+        stop("Too many negative infinities in onsite_usage.")
+      }
+      center_onsite_usage <- log(exp_Qs_onsite_usage)[2]
+      IQR_onsite_usage <- log(exp_Qs_onsite_usage)[3] - log(exp_Qs_onsite_usage)[1]
+      sd_onsite_usage <- IQR_onsite_usage/(qnorm(0.75)-qnorm(0.25))
+      min_onsite_usage <- min(onsite_usage[-negative_inf_loc_onsite_usage], na.rm = TRUE)
+      candidate_onsite_usage <- qnorm(ratio_negative_infs_onsite_usage/2, mean=center_onsite_usage, sd=sd_onsite_usage)
+      replace_onsite_usage <- min(min_onsite_usage, candidate_onsite_usage, na.rm = TRUE)
+      onsite_usage[negative_inf_loc_onsite_usage] <- replace_onsite_usage
+    }
+  }
+
+
+  if(!is.null(ref_series)){
+    if(sum(na.omit(ref_series) == -Inf) > 0)
+    {
+      warning("Negative infinities in ref_series will be replaced with an estimated value.")
+      negative_infs_ref_series <- as.numeric(ref_series == -Inf)
+      negative_inf_loc_ref_series <- which((ref_series == -Inf) == TRUE)
+      ratio_negative_infs_ref_series <- mean(negative_infs_ref_series, na.rm = TRUE)
+      if(sum(negative_infs_ref_series, na.rm = TRUE) > 0){
+        exp_ref_series <- exp(ref_series)
+        exp_Qs_ref_series <- quantile(exp_ref_series, probs=c(0.25,0.5,0.75))
+        if((exp_Qs_ref_series)[1]==0)
+        {
+          stop("Too many negative infinities in ref_series.")
+        }
+        center_ref_series <- log(exp_Qs_ref_series)[2]
+        IQR_ref_series <- log(exp_Qs_ref_series)[3] - log(exp_Qs_ref_series)[1]
+        sd_ref_series <- IQR_ref_series/(qnorm(0.75)-qnorm(0.25))
+        min_ref_series <- min(ref_series[-negative_inf_loc_ref_series], na.rm = TRUE)
+        candidate_ref_series <- qnorm(ratio_negative_infs_ref_series/2, mean=center_ref_series, sd=sd_ref_series)
+        replace_ref_series <- min(min_ref_series, candidate_ref_series, na.rm = TRUE)
+        ref_series[negative_inf_loc_ref_series] <- replace_ref_series
+      }
+    }
+  }
+
+  # If trend == "none", time series window variables are replaced with variables obtained
+  # during the popularity proxy decomposition.
+  if(trend == "none"||trend=="linear")
+  {
     ts_trend_window <- onsite_usage_decomposition$reconstruction$Trend
     ts_seasonality_window <- onsite_usage_decomposition$reconstruction$Seasonality
     latest_starttime <- time(ts_trend_window[1])
     endtime <- time(ts_trend_window[length(ts_trend_window)])
     lagged_proxy_trend_and_forecasts_window <- NULL
-
-  }else{
-
+  }
+  else if(trend == "estimated")
+  {
     ts_trend_window <- popularity_proxy_decomposition_data$ts_trend_window
     ts_seasonality_window <- popularity_proxy_decomposition_data$ts_seasonality_window
     latest_starttime <- popularity_proxy_decomposition_data$latest_starttime
     endtime <- popularity_proxy_decomposition_data$endtime
     lagged_proxy_trend_and_forecasts_window <- popularity_proxy_decomposition_data$lagged_proxy_trend_and_forecasts_window
-
   }
-
 
   # when ref_series is not supplied and beta is set equal to "estimate".
   if(is.null(ref_series) && beta=="estimate")
@@ -410,55 +603,90 @@ estimate_parameters <- function(popularity_proxy_decomposition_data = NULL,
     beta <- fisher_transformed_lag12_acf_of_detrended_ts
   }
 
-
-
   #when ref_series is supplied. The constant term and beta are estimated using least squares.
   if(!is.null(ref_series))
   {
-
-
-
     #if the check below is greater than zero, it returns FALSE, showing that the seasonality is present.
     seasonality_absence_check <- all.equal(sum(abs(ts_seasonality_window)), 0)
 
-    if(omit_trend == TRUE){
+    if(trend == "none"||trend == "linear")
+    {
       past_current_adj_trend <- rep(0,length(ref_series))
       ref_series_window <- ref_series
-    }else{
+    }
+    else if(trend == "estimated")
+    {
       past_current_adj_trend <- c(ts_trend_window - lagged_proxy_trend_and_forecasts_window)
       ref_series_window <- window(ref_series, start = latest_starttime, end = endtime)
     }
 
     detrended_window <- ref_series_window - past_current_adj_trend
+    month <- 1:length(detrended_window)
 
     #seasonality is present
     if(seasonality_absence_check != TRUE)
     {
       if(identical(parameter_estimates,"joint")){
-        past_current_model <- lm(detrended_window~ts_seasonality_window)
-        beta <- summary(past_current_model)$coefficients[,"Estimate"][2]
-        constant <- summary(past_current_model)$coefficients[,"Estimate"][1]
+        if(trend == "none"||trend == "estimated")
+        {
+          past_current_model <- lm(detrended_window~ts_seasonality_window)
+          beta <- summary(past_current_model)$coefficients[,"Estimate"][2]
+          constant <- summary(past_current_model)$coefficients[,"Estimate"][1]
+          slope <- 0
+        }
+        else #trend == "linear"
+        {
+          past_current_model <- lm(detrended_window~ts_seasonality_window+month)
+          slope <- summary(past_current_model)$coefficients[,"Estimate"][3]
+          beta <- summary(past_current_model)$coefficients[,"Estimate"][2]
+          constant <- summary(past_current_model)$coefficients[,"Estimate"][1]
+        }
       } else{
         #least squares estimates of beta and constant term are calculated.
-
-        past_current_model <- lm(diff(detrended_window)~diff(ts_seasonality_window)-1)
-        beta_estimates <- summary(past_current_model)$coefficients[,"Estimate"]
-        beta <- beta_estimates[1]
-        constant <- mean(detrended_window)
+        if(trend == "none"||trend=="estimated")
+        {
+          past_current_model <- lm(diff(detrended_window)~diff(ts_seasonality_window)-1)
+          beta_estimates <- summary(past_current_model)$coefficients[,"Estimate"]
+          beta <- beta_estimates[1]
+          constant <- mean(detrended_window)
+          slope <- 0
+        }
+        else #trend == "linear"
+        {
+          past_current_model <- lm(diff(detrended_window)~diff(ts_seasonality_window))
+          beta_estimates <- summary(past_current_model)$coefficients[,"Estimate"]
+          slope <- beta_estimates[1]
+          beta <- beta_estimates[2]
+          constant <- mean(detrended_window)
+        }
       }
     }
+
     else #seasonality is absent
     {
-      #least squares estimate of the constant term is calculated. The beta estimate is set equal to zero.
-      beta <- 0
-      message("Since there is no detected seasonality component, the seasonality adjustment (beta) is set to zero.")
-      constant <- mean(detrended_window)
+      if(trend == "none"||trend == "estimated")
+      {
+        #least squares estimate of the constant term is calculated. The beta estimate is set equal to zero.
+        beta <- 0
+        message("Since there is no detected seasonality component, the seasonality adjustment (beta) is set to zero.")
+        constant <- mean(detrended_window)
+        slope <- 0
+      }
+      else #trend == "linear"
+      {
+        beta <- 0
+        past_current_model <- lm(detrended_window~month)
+        beta_estimates <- summary(past_current_model)$coefficients[,"Estimate"]
+        slope <- beta_estimates[2]
+        constant <- beta_estimates[1]
+      }
     }
   }
 
   return(list(
     beta = beta,
     constant = constant,
+    slope = slope,
     ts_trend_window = ts_trend_window,
     ts_seasonality_window = ts_seasonality_window,
     latest_starttime = latest_starttime,
@@ -466,15 +694,14 @@ estimate_parameters <- function(popularity_proxy_decomposition_data = NULL,
     lagged_proxy_trend_and_forecasts_window = lagged_proxy_trend_and_forecasts_window
   ))
 
-
-
 }
 
 #' @title Fit Model
 #' @description Fit the visitation model.
 #' @export
 #' @param parameter_estimates_and_time_series_windows # a list storing the outputs of `estimate_parameters`, including parameter estimates `beta` and `constant` as well as data pertaining to time series windows.
-#' @param omit_trend A Boolean specifying whether or not to consider the trend component to be 0.
+#' @param omit_trend This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If
+#' @param trend A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.
 #' @param log_scale A Boolean specifying whether or not the results should be returned in the log scale.
 #' @param ... Additional arguments
 #'
@@ -483,25 +710,53 @@ estimate_parameters <- function(popularity_proxy_decomposition_data = NULL,
 
 fit_model <- function(parameter_estimates_and_time_series_windows,
                       omit_trend,
+                      trend,
                       log_scale,
                       ...
 ){
+
+  # specifying a correct trend input argument. This is just for compatibility.
+  if(is.null(trend))
+  {
+    if(omit_trend == TRUE)
+    {
+      trend = "none"
+    }
+    if(omit_trend == FALSE)
+    {
+      trend = "estimated"
+    }
+  }
+
+  if(trend == "none")
+  {
+    omit_trend = TRUE
+  }
+  if(trend == "estimated")
+  {
+    omit_trend = FALSE
+  }
 
   constant <- parameter_estimates_and_time_series_windows$constant
   ts_trend_window <- parameter_estimates_and_time_series_windows$ts_trend_window
   lagged_proxy_trend_and_forecasts_window <- parameter_estimates_and_time_series_windows$lagged_proxy_trend_and_forecasts_window
   beta <- parameter_estimates_and_time_series_windows$beta
   ts_seasonality_window <- parameter_estimates_and_time_series_windows$ts_seasonality_window
+  slope <- parameter_estimates_and_time_series_windows$slope
+  month <- 1:length(c(ts_trend_window))
 
-
-
-  if(omit_trend == FALSE){
+  if(trend == "estimate")
+  {
     log_visitation_fit <- constant + ts_trend_window - lagged_proxy_trend_and_forecasts_window + beta * ts_seasonality_window
   }
-  if(omit_trend == TRUE){
+  else if(trend == "none")
+  {
     log_visitation_fit <- constant + beta * ts_seasonality_window
   }
-
+  else #trend == "linear"
+  {
+    log_visitation_fit <- constant + beta * ts_seasonality_window + slope * month
+  }
 
   if(log_scale == FALSE)
   {
@@ -525,19 +780,92 @@ fit_model <- function(parameter_estimates_and_time_series_windows,
 #' @param popularity_proxy A vector which stores a time series which may be used as a proxy for the social media time series in the log scale. The length of popularity_proxy must be the same as that of onsite_usage.
 #' @param onsite_usage A vector which stores on-site usage in the log scale for a particular social media platform and recreational site.
 #' @param constant A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. If ref_series is supplied, the constant is overwritten by the least squares estimate.
-#' @param omit_trend A Boolean specifying whether or not to consider the trend component to be 0.
+#' @param omit_trend This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If
+#' @param trend A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.
 #' @param ref_series A numeric vector specifying the original visitation series in the log scale. If such series is available, then its length must be the same as that of time_series.
 #' @param ... Additional arguments.
 #'
 #' @return No return value, called for extra information.
 
-check_arguments <- function(log_scale,popularity_proxy,onsite_usage,ref_series,constant,omit_trend,...){
+check_arguments <- function(log_scale,popularity_proxy,onsite_usage,ref_series,constant,omit_trend,trend,...){
+
+  # specifying a correct trend input argument. This is just for compatibility.
+
+  if(is.null(trend))
+  {
+    if(omit_trend == TRUE)
+    {
+      trend = "none"
+    }
+    if(omit_trend == FALSE)
+    {
+      trend = "estimated"
+    }
+  }
+
+  if(trend == "none")
+  {
+    omit_trend = TRUE
+  }
+  if(trend == "estimated")
+  {
+    omit_trend = FALSE
+  }
+
+  # replace negative infinities with an appropriate value using robust normal approximation
+
+  if(sum(na.omit(onsite_usage) == -Inf) > 0)
+  {
+    negative_infs_onsite_usage <- as.numeric(onsite_usage == -Inf)
+    negative_inf_loc_onsite_usage <- which((onsite_usage == -Inf) == TRUE)
+    ratio_negative_infs_onsite_usage <- mean(negative_infs_onsite_usage, na.rm = TRUE)
+    if(sum(negative_infs_onsite_usage, na.rm = TRUE) > 0){
+      exp_onsite_usage <- exp(onsite_usage)
+      exp_Qs_onsite_usage <- quantile(exp_onsite_usage, probs=c(0.25,0.5,0.75))
+      if((exp_Qs_onsite_usage)[1]==0)
+      {
+        stop("Too many negative infinities in onsite_usage.")
+      }
+      center_onsite_usage <- log(exp_Qs_onsite_usage)[2]
+      IQR_onsite_usage <- log(exp_Qs_onsite_usage)[3] - log(exp_Qs_onsite_usage)[1]
+      sd_onsite_usage <- IQR_onsite_usage/(qnorm(0.75)-qnorm(0.25))
+      min_onsite_usage <- min(onsite_usage[-negative_inf_loc_onsite_usage], na.rm = TRUE)
+      candidate_onsite_usage <- qnorm(ratio_negative_infs_onsite_usage/2, mean=center_onsite_usage, sd=sd_onsite_usage)
+      replace_onsite_usage <- min(min_onsite_usage, candidate_onsite_usage, na.rm = TRUE)
+      onsite_usage[negative_inf_loc_onsite_usage] <- replace_onsite_usage
+    }
+  }
+
+
+  if(!is.null(ref_series)){
+    if(sum(na.omit(ref_series) == -Inf) > 0)
+    {
+      negative_infs_ref_series <- as.numeric(ref_series == -Inf)
+      negative_inf_loc_ref_series <- which((ref_series == -Inf) == TRUE)
+      ratio_negative_infs_ref_series <- mean(negative_infs_ref_series, na.rm = TRUE)
+      if(sum(negative_infs_ref_series, na.rm = TRUE) > 0){
+        exp_ref_series <- exp(ref_series)
+        exp_Qs_ref_series <- quantile(exp_ref_series, probs=c(0.25,0.5,0.75))
+        if((exp_Qs_ref_series)[1]==0)
+        {
+          stop("Too many negative infinities in ref_series.")
+        }
+        center_ref_series <- log(exp_Qs_ref_series)[2]
+        IQR_ref_series <- log(exp_Qs_ref_series)[3] - log(exp_Qs_ref_series)[1]
+        sd_ref_series <- IQR_ref_series/(qnorm(0.75)-qnorm(0.25))
+        min_ref_series <- min(ref_series[-negative_inf_loc_ref_series], na.rm = TRUE)
+        candidate_ref_series <- qnorm(ratio_negative_infs_ref_series/2, mean=center_ref_series, sd=sd_ref_series)
+        replace_ref_series <- min(min_ref_series, candidate_ref_series, na.rm = TRUE)
+        ref_series[negative_inf_loc_ref_series] <- replace_ref_series
+      }
+    }
+  }
 
   if(log_scale == TRUE)
   {
     message("All the forecasts will be made in the log scale.")
   }
-  if((length(popularity_proxy) != length(onsite_usage)) & !omit_trend)
+  if((length(popularity_proxy) != length(onsite_usage)) & trend == "estimated")
   {
     stop("lengths of onsite_usage and popularity_proxy differ.")
   }
@@ -560,11 +888,10 @@ check_arguments <- function(log_scale,popularity_proxy,onsite_usage,ref_series,c
             replaced by the least squares estimate using the series specified in
             the ref_series argument.")
   }
-  if(omit_trend == TRUE && !is.null(popularity_proxy)){
+  if(trend != "estimated" && !is.null(popularity_proxy)){
 
-    message("When omit_trend == TRUE, popularity_proxy will not be used.")
+    message("When no or linear trend is assumed, popularity_proxy will not be used.")
 
   }
 
 }
-

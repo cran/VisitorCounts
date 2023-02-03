@@ -22,10 +22,12 @@ visitation_model(
   ref_series = NULL,
   beta = "estimate",
   constant = 0,
+  slope = 0,
   log_scale = TRUE,
   spline = FALSE,
-  parameter_estimates = c("separate", "joint"),
+  parameter_estimates = c("joint", "separate"),
   omit_trend = TRUE,
+  trend = c("linear", "none", "estimated"),
   ...
 )
 }
@@ -64,13 +66,17 @@ visitation_model(
 
 \item{constant}{A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. The default option is 0, implying that the time_series well represents the actual visitation counts, which is rarely the case. If ref_series is supplied, the constant is overwritten by the least squares estimate.}
 
+\item{slope}{A numeric specifying the slope coefficient in the model. This constant is applicable only when trend is set to "linear". The default option is 0, implying that the linear trend is absent.}
+
 \item{log_scale}{A Boolean specifying whether or not the results should be returned in the log scale. The default option is TRUE, in which case, the results are returned in the log scale.}
 
 \item{spline}{A Boolean specifying whether or not to use a smoothing spline for the lag estimation. This is relevant only when omit_trend is FALSE.}
 
 \item{parameter_estimates}{A character string specifying how to estimate beta and constant parameters should a reference series be supplied. Both options use least squares estimates, but "separate" indicates that the differenced series should be used to estimate beta separately from the constant, while "joint" indicates to estimate both using non-differenced detrended series.}
 
-\item{omit_trend}{A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0.}
+\item{omit_trend}{This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If}
+
+\item{trend}{A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.}
 
 \item{...}{Additional arguments to be passed onto the smoothing spline (\code{smooth.spline}).}
 }
@@ -79,13 +85,15 @@ visitation_model(
 \item{differenced_fit}{A vector storing differenced fitted values of visitation model. (Equal to \code{diff(visitation_fit)}.)}
 \item{beta}{A numeric storing the estimated seasonality adjustment factor.}
 \item{constant}{A numeric storing estimated constant term used in the model.}
+\item{slope}{A numeric storing estimated slope coefficient term used in the model.}
 \item{proxy_decomposition}{A "decomposition" object representing the automatic decomposition obtained from popularity_proxy (see auto_decompose())}
 \item{time_series_decomposition}{A "decomposition" object representing the automatic decomposition obtained from time_series (see auto_decompose())}
 \item{forecasts_needed}{An integer representing the number of forecasts of popularity_proxy needed to obtain all fitted values. Negative values indicate extra observations which may be useful for predictions.}
 \item{lag_estimate}{A list storing both the MSE-based estimate and Rank-based estimates for the lag.}
 \item{criterion}{A string; one of "cross-correlation", "MSE", or "rank", specifying the method used to select the appropriate lag.}
 \item{ref_series}{The reference series, if one was supplied.}
-\item{omit_trend}{Whether or not trend was considered 0 in the model.}
+\item{omit_trend}{Whether or not trend was considered 0 in the model. This is obsolete and is left only for compatibility.}
+\item{trend}{The trend used in the model.}
 \item{call}{The model call.}
 }
 \description{
@@ -107,18 +115,27 @@ nps_ts <- log(nps_ts)
 popularity_proxy <- log(flickr_userdays)
 
 
-### fit two models ---------------
+### fit three models ---------------
 
-vm_pud_only <- visitation_model(pud_ts,popularity_proxy = popularity_proxy, omit_trend = FALSE)
+vm_pud_linear <- visitation_model(pud_ts,
+                                  ref_series = nps_ts,
+                                  parameter_estimates = "joint",
+                                  trend = "linear")
+vm_pud_only <- visitation_model(pud_ts,
+                                popularity_proxy = popularity_proxy,
+                                trend = "estimated")
 vm_ref_series <- visitation_model(pud_ts,
-                                  popularity_proxy,
+                                  popularity_proxy = popularity_proxy,
                                   ref_series = nps_ts,
                                   parameter_estimates = "separate",
                                   possible_lags = -36:36,
-                                  omit_trend = TRUE)
+                                  trend = "none")
 
 
 ### visualize fit ------------------
+
+plot(vm_pud_linear, ylim = c(-3,3), difference = TRUE)
+lines(diff(nps_ts), col = "red")
 
 plot(vm_pud_only, ylim = c(-3,3), difference = TRUE)
 lines(diff(nps_ts), col = "red")

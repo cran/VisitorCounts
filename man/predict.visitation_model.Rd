@@ -34,6 +34,7 @@ A predictions for the automatic decomposition.
 \item{onsite_usage_forecasts}{A vector for the visitation forecasts.}
 \item{beta}{A numeric for the seasonality adjustment factor.}
 \item{constant}{A numeric for the value of the constant in the model.}
+\item{slope}{A numeric for the value of the slope term in the model when trend is set to "linear".}
 \item{criterion}{A string which specifies the method used to select the appropriate lag. Only applicable if the trend component is part of the forecasts.}
 \item{past_observations}{A vector which specifies the fitted values for the past observations.}
 \item{lag_estimate}{A numeric for the estimated lag. Only applicable if the trend component is part of the forecasts.}
@@ -55,7 +56,7 @@ nps_ts <- ts(park_visitation[park_visitation$park == park,]$nps, start = 2005, f
 nps_ts <- log(nps_ts)
 popularity_proxy <- log(flickr_userdays)
 
-vm <- visitation_model(pud_ts,popularity_proxy, ref_series = nps_ts,omit_trend = TRUE)
+vm <- visitation_model(pud_ts,popularity_proxy, ref_series = nps_ts, trend = "linear")
 predict_vm <- predict(vm,n_ahead, difference = TRUE,
                       only_new = FALSE, past_observations = "reference")
 plot(predict_vm, difference = FALSE)

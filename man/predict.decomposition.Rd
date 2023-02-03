@@ -11,7 +11,7 @@
 
 \item{n_ahead}{An integer describing the number of forecasts to make.}
 
-\item{only_new}{A boolean describing whether or not to include past values.}
+\item{only_new}{A Boolean describing whether or not to include past values.}
 
 \item{...}{Additional arguments.}
 }

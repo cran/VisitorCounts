@@ -50,7 +50,7 @@ plot.decomposition <- function(x, type = c("full","period","classical"), legend 
   l <- length(x$reconstruction)
 
   presets <- list(ylab = "Reconstruction",
-                  lwd = 1.5)
+                  lwd = 1.5, type ="l")
 
   z <- list(...)
   new_args <- names(z)

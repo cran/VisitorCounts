@@ -9,9 +9,11 @@ estimate_parameters(
   onsite_usage,
   onsite_usage_decomposition,
   omit_trend,
+  trend,
   ref_series,
   beta,
   constant,
+  slope,
   parameter_estimates,
   ...
 )
@@ -23,13 +25,17 @@ estimate_parameters(
 
 \item{onsite_usage_decomposition}{A "decomposition" class object containing decomposition data for the onsite usage time series (outputs from `auto_decompose`).}
 
-\item{omit_trend}{A Boolean specifying whether or not to consider the trend component to be 0.}
+\item{omit_trend}{This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0.}
+
+\item{trend}{A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.}
 
 \item{ref_series}{A numeric vector specifying the original visitation series in the log scale.}
 
 \item{beta}{A numeric or a character string specifying the seasonality adjustment factor. The default option is "estimate", in which case, it is estimated by using the Fisher's z-transformed lag 12 autocorrelation. Even if an actual value is supplied, if ref_series is supplied, it is overwritten by the least squares estimate.}
 
 \item{constant}{A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. If ref_series is supplied, the constant is overwritten by the least squares estimate.}
+
+\item{slope}{A numeric specifying the slope coefficient in the model. This constant is applicable only when trend is set to "linear".}
 
 \item{parameter_estimates}{A character string specifying how to estimate beta and constant parameters should a reference series be supplied. Both options use least squares estimates, but "separate" indicates that the differenced series should be used to estimate beta separately from the constant, while "joint" indicates to estimate both using non-differenced detrended series.}
 
@@ -43,6 +49,7 @@ estimate_parameters(
 \item{endtime}{A `tsp` attribute of a `ts` object representing the time of the final onsite usage observation.}
 \item{beta}{A numeric storing the estimated seasonality adjustment factor.}
 \item{constant}{A numeric storing estimated constant term used in the model.}
+\item{slope}{A numeric storing the estimated slope term used in the model. Applicable when the trend parameter is "linear". Otherwise, NULL is returned.}
 }
 \description{
 Estimate the two parameters (y-intercept and seasonality factor) for the visitation model.

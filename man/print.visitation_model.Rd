@@ -18,7 +18,6 @@ A "decomposition" class object.
 Methods for summarizing objects of the class "decomposition".
 }
 \examples{
-
 #Example:
 
 data("park_visitation")

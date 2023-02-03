@@ -22,10 +22,12 @@ decompose_proxy(
   ref_series = NULL,
   beta = "estimate",
   constant = 0,
+  slope = 0,
   log_scale = TRUE,
   spline = FALSE,
   parameter_estimates = c("separate", "joint"),
   omit_trend = TRUE,
+  trend = c("linear", "none", "estimated"),
   onsite_usage_decomposition,
   ...
 )
@@ -65,13 +67,17 @@ decompose_proxy(
 
 \item{constant}{A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. The default option is 0, implying that the time_series well represents the actual visitation counts, which is rarely the case. If ref_series is supplied, the constant is overwritten by the least squares estimate.}
 
+\item{slope}{A numeric specifying the slope coefficient in the model. This constant is applicable only when trend is set to "linear". The default option is 0, implying that the linear trend is absent.}
+
 \item{log_scale}{A Boolean specifying whether or not the results should be returned in the log scale. The default option is TRUE, in which case, the results are returned in the log scale.}
 
 \item{spline}{A Boolean specifying whether or not to use a smoothing spline for the lag estimation. This is relevant only when omit_trend is FALSE.}
 
 \item{parameter_estimates}{A character string specifying how to estimate beta and constant parameters should a reference series be supplied. Both options use least squares estimates, but "separate" indicates that the differenced series should be used to estimate beta separately from the constant, while "joint" indicates to estimate both using non-differenced detrended series.}
 
-\item{omit_trend}{A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0.}
+\item{omit_trend}{This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If}
+
+\item{trend}{A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.}
 
 \item{onsite_usage_decomposition}{A "decomposition" class object containing decomposition data for the onsite usage time series (outputs from `auto_decompose`).}
 

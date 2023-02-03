@@ -11,6 +11,7 @@ check_arguments(
   ref_series,
   constant,
   omit_trend,
+  trend,
   ...
 )
 }
@@ -25,7 +26,9 @@ check_arguments(
 
 \item{constant}{A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. If ref_series is supplied, the constant is overwritten by the least squares estimate.}
 
-\item{omit_trend}{A Boolean specifying whether or not to consider the trend component to be 0.}
+\item{omit_trend}{This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If}
+
+\item{trend}{A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.}
 
 \item{...}{Additional arguments.}
 }

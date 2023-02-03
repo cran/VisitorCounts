@@ -24,13 +24,15 @@ data("flickr_userdays")
 
 check_trend_forecasts <- function(park_visitation, park,popularity_proxy,n_ahead){
 
+
+  #extract pud and nps data
   pud_ts <- ts(park_visitation[park_visitation$park == park,]$pud, start = 2005, frequency = 12)
   pud_ts <- log(pud_ts)
 
   nps_ts <- ts(park_visitation[park_visitation$park == park,]$nps, start = 2005, frequency = 12)
   nps_ts <- log(nps_ts)
-
-  vm <- visitation_model(pud_ts,popularity_proxy, omit_trend = FALSE)
+  #create visitation model and
+  vm <- visitation_model(pud_ts,popularity_proxy, omit_trend = FALSE, trend = "estimated") #I think this is where the issue is
   predict_vm <- predict(vm,n_ahead, difference = TRUE, only_new = TRUE)
 
   n_forecasts_needed <- n_ahead+vm$forecasts_needed

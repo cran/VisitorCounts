@@ -75,6 +75,7 @@ print.visitation_forecast <- function(x,...){
 
   beta <- round(x$beta,3)
   constant <- round(x$constant,3)
+  slope <- round(x$slope,3)
   n_forecast <- x$n_ahead
   criterion <- x$criterion
   lag_estimate <- x$lag_estimate
@@ -85,7 +86,8 @@ print.visitation_forecast <- function(x,...){
   cat(sprintf("%-20s %s","Parameter:","Estimate: \n"))
   cat(sprintf("%-20s %s","----------","--------- \n"))
   cat(sprintf("%-20s %s","Beta:",paste(beta,"\n")))
-  cat(sprintf("%-20s %s","Constant:",paste(constant,"\n")))
+  cat(sprintf("%-20s %s","Exp(Constant):",paste(constant,"\n")))
+  cat(sprintf("%-20s %s","Slope:",paste(slope,"\n")))
   cat(sprintf("%-20s %s","Lag:",paste(lag_estimate,"\n")))
   cat("=============================== \n")
   cat(paste("Criterion for Lag Estimate:",criterion,"\n"))
@@ -121,6 +123,8 @@ print.visitation_forecast <- function(x,...){
 print.visitation_model <- function(x,...){
   beta <- round(x$beta,4)
   constant <- x$constant
+  slope <- round(x$slope,4)
+
   lag_estimate <- x$lag_estimate$lag
   criterion <- x$criterion
 
@@ -130,12 +134,10 @@ print.visitation_model <- function(x,...){
   cat(sprintf("%-20s %s","Parameter:","Estimate: \n"))
   cat(sprintf("%-20s %s","----------","--------- \n"))
   cat(sprintf("%-20s %s","Beta:",paste(beta,"\n")))
-  cat(sprintf("%-20s %s","Constant:",paste(constant,"\n")))
+  cat(sprintf("%-20s %s","Exp(Constant):",paste(constant,"\n")))
+  cat(sprintf("%-20s %s","Slope:",paste(slope,"\n")))
   cat(sprintf("%-20s %s","Lag:",paste(lag_estimate,"\n")))
   cat(sprintf("%-20s %s","Lag Criterion:",paste(criterion,"\n")))
   cat("=============================== \n")
   invisible(x)
 }
-
-
-

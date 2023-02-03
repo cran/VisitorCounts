@@ -11,6 +11,7 @@ new_visitation_forecast(
   onsite_usage_forecasts,
   beta,
   constant,
+  slope,
   criterion,
   past_observations,
   lag_estimate
@@ -25,9 +26,11 @@ new_visitation_forecast(
 
 \item{onsite_usage_forecasts}{A time series of forecasts of the original time series.}
 
-\item{beta}{A numeric or a character string specifying the seasonality adjustment factor. The default option is "estimate", in which case, it is estimated by using the Fisher's z-transformed lag-12 autocorrelation. Even if an actual value is supplied, if ref_series is supplied, it is overwritten by the least squares estimate.}
+\item{beta}{A numeric or a character string specifying the seasonality adjustment factor.}
 
-\item{constant}{A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. The default option is 0, implying that the time_series well represents the actual visitation counts, which is rarely the case. If ref_series is supplied, the constant is overwritten by the least squares estimate.}
+\item{constant}{A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series.}
+
+\item{slope}{A numeric specifying the slope term in the model when a linear trend is assumed.}
 
 \item{criterion}{One of "MSE" or "Nonparametric", to specify the criterion used to select the lag.}
 

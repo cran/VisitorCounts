@@ -9,6 +9,7 @@ new_visitation_model(
   differenced_fit,
   beta,
   constant,
+  slope,
   lag_estimate,
   proxy_decomposition,
   onsite_usage_decomposition,
@@ -16,6 +17,7 @@ new_visitation_model(
   ref_series,
   criterion,
   omit_trend,
+  trend,
   call
 )
 }
@@ -26,7 +28,9 @@ new_visitation_model(
 
 \item{beta}{Seasonality adjustment factor.}
 
-\item{constant}{A double describing the constant term used in the model.}
+\item{constant}{A numeric describing the constant term used in the model.}
+
+\item{slope}{A numeric describing the slope term used in the model when trend is set to "linear".}
 
 \item{lag_estimate}{An integer representing the lag parameter for the model fit.}
 
@@ -40,7 +44,9 @@ new_visitation_model(
 
 \item{criterion}{A character string specifying the criterion for estimating the lag in popularity_proxy. If "cross-correlation" is chosen, it chooses the lag that maximizes the correlation coefficient between lagged popularity_proxy and onsite_usage. If "MSE" is chosen, it does so by identifying the lagged popularity_proxy whose derivative is closest to that of onsite_usage by minimizing the mean squared error. If "rank" is chosen, it does so by firstly ranking the square errors of the derivatives and identifying the lag which would minimize the mean rank.}
 
-\item{omit_trend}{A Boolean specifying whether or not to consider the NPS trend to be zero.}
+\item{omit_trend}{This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the NPS trend to be zero.}
+
+\item{trend}{A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.}
 
 \item{call}{A call for the visitation model.}
 }

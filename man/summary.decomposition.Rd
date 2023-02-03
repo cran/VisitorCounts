@@ -18,7 +18,7 @@ A "decomposition" class object.
 S3 method for summarizing objects of the class "decomposition".
 }
 \examples{
- data("park_visitation")
+data("park_visitation")
 
 park <- "YELL"
 nps_ts <- ts(park_visitation[park_visitation$park == park,]$nps, start = 2005, freq = 12)

@@ -11,38 +11,41 @@ estimate_parameters(
   omit_trend,
   trend,
   ref_series,
-  beta,
   constant,
+  beta,
   slope,
   parameter_estimates,
+  is_input_logged,
   ...
 )
 }
 \arguments{
-\item{popularity_proxy_decomposition_data}{A "decomposition" class object containing decomposition data for the popularity proxy time series (outputs from `auto_decompose`).}
+\item{popularity_proxy_decomposition_data}{A "decomposition" class object containing decomposition data for the popularity proxy time series (outputs from \code{\link{auto_decompose}}).}
 
-\item{onsite_usage}{A vector which stores on-site usage in the log scale for a particular social media platform and recreational site.}
+\item{onsite_usage}{A vector which stores monthly onsite usage for a particular social media platform and recreational site.}
 
-\item{onsite_usage_decomposition}{A "decomposition" class object containing decomposition data for the onsite usage time series (outputs from `auto_decompose`).}
+\item{onsite_usage_decomposition}{A "decomposition" class object containing decomposition data for the monthly onsite usage time series (outputs from \code{\link{auto_decompose}}).}
 
-\item{omit_trend}{This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0.}
+\item{omit_trend}{This is obsolete and is left only for compatibility. In other words, \code{trend} will overwrite any option chosen in \code{omit_trend}. If \code{trend} is NULL, then \code{trend} is overwritten according to \code{omit_trend}. It is a Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If it is set to FALSE, then it is estimated using data.}
 
 \item{trend}{A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.}
 
-\item{ref_series}{A numeric vector specifying the original visitation series in the log scale.}
+\item{ref_series}{A numeric vector specifying the original visitation series. The default option is NULL, implying that no such series is available. If such series is available, then its length must be the same as that of \code{onsite_usage}.}
 
-\item{beta}{A numeric or a character string specifying the seasonality adjustment factor. The default option is "estimate", in which case, it is estimated by using the Fisher's z-transformed lag 12 autocorrelation. Even if an actual value is supplied, if ref_series is supplied, it is overwritten by the least squares estimate.}
+\item{constant}{A numeric specifying the constant term (beta0) in the model. This constant is understood as the mean log adjusted monthly visitation relative to the base month. The default option is 0, implying that the (logged) \code{onsite_usage} does not require any constant shift, which is unusual. If \code{ref_series} is supplied, the constant is overwritten by the least squares estimate.}
 
-\item{constant}{A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. If ref_series is supplied, the constant is overwritten by the least squares estimate.}
+\item{beta}{A numeric or a character string specifying the seasonality adjustment factor (beta1). The default option is "estimate", in which case, it is estimated by using the Fisher's z-transformed lag-12 autocorrelation. Even if an actual value is supplied, if \code{ref_series} is supplied, it is overwritten by the least squares estimate.}
 
-\item{slope}{A numeric specifying the slope coefficient in the model. This constant is applicable only when trend is set to "linear".}
+\item{slope}{A numeric specifying the slope coefficient (beta2) in the model. This constant is applicable only when \code{trend} is set to "linear". The default option is 0, implying that the linear trend is absent.}
 
 \item{parameter_estimates}{A character string specifying how to estimate beta and constant parameters should a reference series be supplied. Both options use least squares estimates, but "separate" indicates that the differenced series should be used to estimate beta separately from the constant, while "joint" indicates to estimate both using non-differenced detrended series.}
+
+\item{is_input_logged}{A Boolean describing whether the \code{onsite_usage}, \code{ref_series}, and \code{popularity_proxy} are in the log scale. The default option is FALSE, in which case the inputs will be assumed to not be logged and will be logged before making forecasts. Setting it to TRUE will assume the inputs are logged.}
 
 \item{...}{Additional arguments.}
 }
 \value{
-\item{lagged_proxy_trend_and_forecasts_window}{A `ts` object storing the potentially lagged popularity proxy trend and any forecasts needed due to the lag}
+\item{lagged_proxy_trend_and_forecasts_window}{A `ts` object storing the potentially lagged popularity proxy trend and any forecasts needed due to the lag.}
 \item{ts_trend_window}{A `ts` object storing the trend component of the onsite social media usage. This trend component is potentially truncated to match available popularity proxy data.}
 \item{ts_seasonality_window}{A `ts` object storing the seasonality component of the onsite social media usage. This seasonality component is potentially truncated to match available popularity proxy data.}
 \item{latest_starttime}{A `tsp` attribute of a `ts` object representing the latest of the two start times of the potentially lagged populairty proxy and the onsite social media usage.}

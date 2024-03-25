@@ -5,30 +5,30 @@
 \title{Check Arguments}
 \usage{
 check_arguments(
-  log_scale,
   popularity_proxy,
   onsite_usage,
-  ref_series,
   constant,
   omit_trend,
   trend,
+  ref_series,
+  is_input_logged,
   ...
 )
 }
 \arguments{
-\item{log_scale}{A Boolean specifying whether or not the results should be returned in the log scale.}
+\item{popularity_proxy}{A vector which stores a time series which may be used as a proxy for the monthly popularity of social media over time. The length of \code{popularity_proxy} must be the same as that of \code{onsite_usage}. The default option is NULL, in which case, no proxy needs to be supplied. Note that this vector cannot have a value of 0.}
 
-\item{popularity_proxy}{A vector which stores a time series which may be used as a proxy for the social media time series in the log scale. The length of popularity_proxy must be the same as that of onsite_usage.}
+\item{onsite_usage}{A vector which stores monthly on-site usage for a particular social media platform and recreational site.}
 
-\item{onsite_usage}{A vector which stores on-site usage in the log scale for a particular social media platform and recreational site.}
+\item{constant}{A numeric specifying the constant term (beta0) in the model. This constant is understood as the mean log adjusted monthly visitation relative to the base month. The default option is 0, implying that the (logged) \code{onsite_usage} does not require any constant shift, which is unusual. If \code{ref_series} is supplied, the constant is overwritten by the least squares estimate.}
 
-\item{ref_series}{A numeric vector specifying the original visitation series in the log scale. If such series is available, then its length must be the same as that of time_series.}
-
-\item{constant}{A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. If ref_series is supplied, the constant is overwritten by the least squares estimate.}
-
-\item{omit_trend}{This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If}
+\item{omit_trend}{This is obsolete and is left only for compatibility. In other words, \code{trend} will overwrite any option chosen in \code{omit_trend}. If \code{trend} is NULL, then \code{trend} is overwritten according to \code{omit_trend}. It is a Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If it is set to FALSE, then it is estimated using data.}
 
 \item{trend}{A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.}
+
+\item{ref_series}{A numeric vector specifying the original visitation series. The default option is NULL, implying that no such series is available. If such series is available, then its length must be the same as that of \code{onsite_usage}.}
+
+\item{is_input_logged}{A Boolean describing whether the \code{onsite_usage}, \code{ref_series}, and \code{popularity_proxy} are in the log scale. The default option is FALSE, in which case the inputs will be assumed to not be logged and will be logged before making forecasts. Setting it to TRUE will assume the inputs are logged.}
 
 \item{...}{Additional arguments.}
 }

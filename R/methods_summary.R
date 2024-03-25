@@ -69,9 +69,16 @@ summary.decomposition <- function(object,...){
 
 
 summary.visitation_forecast <- function(object,...){
-  beta <- round(object$beta,3)
-  constant <- round(object$constant,3)
-  slope <- round(object$slope,3)
+
+  # Note 
+  #   The constant corresponds to the beta_0 in our model
+  #   The beta parameter corresponds to the beta_1 coefficient in our model
+  #   The slope (calculated only when we're estimating trend ) is the corresponding beta_2 in our model
+
+
+  beta_0 <- round(object$constant,3)
+  beta_1 <- round(object$beta,3)
+  beta_2 <- round(object$slope,3)
   n_forecast <- object$n_ahead
   criterion <- object$criterion
   lag_estimate <- object$lag_estimate
@@ -81,9 +88,9 @@ summary.visitation_forecast <- function(object,...){
   cat("=============================== \n")
   cat(sprintf("%-20s %s","Parameter:","Estimate: \n"))
   cat(sprintf("%-20s %s","----------","--------- \n"))
-  cat(sprintf("%-20s %s","Beta:",paste(beta,"\n")))
-  cat(sprintf("%-20s %s","Exp(Constant):",paste(constant,"\n")))
-  cat(sprintf("%-20s %s","Slope:",paste(slope,"\n")))
+  cat(sprintf("%-20s %s","Beta_0 (Constant):",paste(beta_0,"\n")))
+  cat(sprintf("%-20s %s","Beta_1 (Seasonality):",paste(beta_1,"\n")))
+  cat(sprintf("%-20s %s","Beta_2 (Trend):",paste(beta_2,"\n")))
   cat(sprintf("%-20s %s","Lag:",paste(lag_estimate,"\n")))
   cat("=============================== \n")
   cat(paste("Criterion for Lag Estimate:",criterion,"\n"))
@@ -99,8 +106,6 @@ summary.visitation_forecast <- function(object,...){
 #' @param ... Additional arguments.
 #'
 #' @return A "decomposition" class object.
-#' @examples
-#'
 #' @examples
 #' #Example:
 #'
@@ -118,9 +123,14 @@ summary.visitation_forecast <- function(object,...){
 
 
 summary.visitation_model <- function(object,...){
-  beta <- round(object$beta,4)
-  constant <- object$constant
-  slope <- round(object$slope,4)
+  # Note 
+  #   The constant corresponds to the beta_0 in our model
+  #   The beta parameter corresponds to the beta_1 coefficient in our model
+  #   The slope (calculated only when we're estimating trend ) is the corresponding beta_2 in our model
+
+  beta_0 <- round(object$constant,3)
+  beta_1 <- round(object$beta,3)
+  beta_2 <- round(object$slope,3)
   lag_estimate <- object$lag_estimate$lag
   criterion <- object$criterion
 
@@ -129,9 +139,9 @@ summary.visitation_model <- function(object,...){
   cat("=============================== \n")
   cat(sprintf("%-20s %s","Parameter:","Estimate: \n"))
   cat(sprintf("%-20s %s","----------","--------- \n"))
-  cat(sprintf("%-20s %s","Beta:",paste(beta,"\n")))
-  cat(sprintf("%-20s %s","Exp(Constant):",paste(constant,"\n")))
-  cat(sprintf("%-20s %s","Slope:",paste(slope,"\n")))
+  cat(sprintf("%-20s %s","Beta_0 (Constant):",paste(beta_0,"\n")))
+  cat(sprintf("%-20s %s","Beta_1 (Seasonality):",paste(beta_1,"\n")))
+  cat(sprintf("%-20s %s","Beta_2 (Trend):",paste(beta_2,"\n")))
   cat(sprintf("%-20s %s","Lag:",paste(lag_estimate,"\n")))
   cat(sprintf("%-20s %s","Lag Criterion:",paste(criterion,"\n")))
   cat("=============================== \n")

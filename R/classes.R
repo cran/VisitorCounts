@@ -5,7 +5,7 @@
 #' @param grouping_matrix A matrix containing information about the locations of the eigenvalue groups for each period in suspected_periods and trend component. The locations are indicated by '1'.
 #' @param window_length A numeric indicating the window length.
 #' @param ts_ssa An object of the class "ssa".
-#'
+#' @importFrom methods is
 #' @return  A list of the class "decomposition".
 #'
 #'
@@ -23,16 +23,85 @@ new_decomposition <- function(reconstruction_list,
             class = "decomposition")
 }
 
+
+#' @title visitation_forecast_ensemble Class
+#' @description Class for plotting an array of visitation_foreces
+#' @export
+#' @param visitation_forecasts An array of  visitation_forecast object
+#' @param labels An array of  labels associated with visitation_forecast
+#' @importFrom methods is
+
+
+new_visitation_forecast_ensemble  <- function(visitation_forecasts, labels){
+  if (!is.list(visitation_forecasts) ) {stop("visitation_forecasts must be a list of visitation_forecast objects") }
+  if(!is.list(labels)) {stop("labels must be a list of strings ") }
+
+  if(length(visitation_forecasts) != length(labels))
+  {
+      stop("The visitation forecasts and labels must have the same size, please add a label for each corresponding visitation forecast")
+  }
+
+  forecast_ensemble<-list()
+
+  for(i in seq_along(visitation_forecasts))
+  {
+
+    if(!is(visitation_forecasts[[i]],"visitation_forecast"))
+    {
+      stop("each visitation_forecast provided must be of type visitation_forecast, please add a name to your visitation_forecast")
+    }
+    if(!is.character(labels[[i]]))
+    {
+      stop("each label provided must be string, please add a label to each of the forecasts")
+    }
+
+    forecast_ensemble[[i]]<-label_visitation_forecast(visitation_forecasts[[i]], labels[[i]])
+  }
+
+  structure(list(forecast_ensemble = forecast_ensemble),
+  class = "visitation_forecast_ensemble")
+}
+
+
+
+#' @return Object of class "visitation_forecast_ensemble".
+
+
+
+#' @title labeled_visitation_forecast Class
+#' @description Class for visitation_model predictions (for use with predict.visitation_model()).
+#' @export
+#' @param visitation_forecast A visitation_forecast object
+#' @param label A character string of the label of forecast
+#' @importFrom methods is
+
+label_visitation_forecast <- function(visitation_forecast, label){
+                       
+  if(!is(visitation_forecast,"visitation_forecast")) stop("visitation_forecast must be a visitation_forecast object")
+  if (!is.character(label)) stop("label must be a string")
+  
+  structure(list(
+                 visitation_forecast = visitation_forecast,
+                 label = label), class = "labeled_visitation_forecast")
+}
+
+#' @return Object of class "labeled_visitation_forecast".
+
+
+
 #' @title visitation_forecast Class
 #' @description Class for visitation_model predictions (for use with predict.visitation_model()).
 #' @export
-#' @param forecasts A time series of forecasts for the visitation model.
+#' @param forecasts A time series of forecasts for the visitation model. the forecasts will be in the standard scale of visitors per month
+#' @param logged_forecasts A time series of the logged forecasts for the visitation model. 
+#' @param differenced_logged_forecasts A time series of the differenced logged forecasts  for the visitation model.
+#' @param differenced_standard_forecasts A time series of the exponentiated differenced logged forecasts that are for the visitation model.
 #' @param n_ahead An integer describing the number of forecasts made.
 #' @param proxy_forecasts A time series of forecasts of the popularity proxy series.
 #' @param onsite_usage_forecasts A time series of forecasts of the original time series.
-#' @param beta A numeric or a character string specifying the seasonality adjustment factor.
-#' @param constant A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series.
-#' @param slope A numeric specifying the slope term in the model when a linear trend is assumed.
+#' @param beta A numeric or a character string specifying the seasonality adjustment factor. (beta_1)
+#' @param constant A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. (beta_0)
+#' @param slope A numeric specifying the slope term in the model when a linear trend is assumed. (beta_2)
 #' @param criterion One of "MSE" or "Nonparametric", to specify the criterion used to select the lag.
 #' @param past_observations One of "none", "fitted", or "ref_series". If "fitted", past model fitted values are used. If "ref_series", the reference series in the visitation model object is used. Note that if difference = TRUE, one of these is needed to forecast the first difference.
 #' @param lag_estimate A numeric value specifying the estimated lag in the visitation model.
@@ -42,6 +111,9 @@ new_decomposition <- function(reconstruction_list,
 
 
 new_visitation_forecast <- function(forecasts,
+                                    logged_forecasts, 
+                                    differenced_logged_forecasts,
+                                    differenced_standard_forecasts,
                                     n_ahead,
                                     proxy_forecasts,
                                     onsite_usage_forecasts,
@@ -51,11 +123,16 @@ new_visitation_forecast <- function(forecasts,
                                     criterion,
                                     past_observations,
                                     lag_estimate){
-
   if (!is.ts(forecasts)) stop("visitation_forecast must be a ts object")
+  if (!is.ts(logged_forecasts)) stop("logged visitation_forecast must be a ts object")
+  if (!is.ts(differenced_logged_forecasts)) stop("differenced logged visitation_forecast must be a ts object")
+  if (!is.ts(differenced_standard_forecasts)) stop("differenced standard scale visitation_forecast must be a ts object")
   if (!is.numeric(n_ahead)) stop("n_ahead must be numeric")
   if (!is.list(onsite_usage_forecasts)) stop("time_series_forecasts must be a list")
   structure(list(forecasts = forecasts,
+                 logged_forecasts = logged_forecasts, 
+                 differenced_logged_forecasts = differenced_logged_forecasts, 
+                 differenced_standard_forecasts  = differenced_standard_forecasts,
                  n_ahead = n_ahead,
                  proxy_forecasts = proxy_forecasts,
                  onsite_usage_forecasts = onsite_usage_forecasts,
@@ -74,9 +151,9 @@ new_visitation_forecast <- function(forecasts,
 #' @export
 #' @param visitation_fit A time series storing the fitted values of the visitation model.
 #' @param differenced_fit A time series storing the differenced fitted values of the visitation model.
-#' @param beta Seasonality adjustment factor.
-#' @param constant A numeric describing the constant term used in the model.
-#' @param slope A numeric describing the slope term used in the model when trend is set to "linear".
+#' @param beta Seasonality adjustment factor. (beta_1)
+#' @param constant A numeric describing the constant term used in the model. (beta_0)
+#' @param slope A numeric describing the slope term used in the model when trend is set to "linear". (beta_2)
 #' @param lag_estimate An integer representing the lag parameter for the model fit.
 #' @param onsite_usage_decomposition A decomposition class object representing the decomposition of time series (e.g., park Photo-User-Days).
 #' @param proxy_decomposition A decomposition class object representing the decomposition of a popularity measure (e.g., US Photo-User-Days).
@@ -121,8 +198,9 @@ new_visitation_model <- function(visitation_fit,
                  criterion = criterion,
                  omit_trend = omit_trend,
                  trend = trend,
-                 call = call),
-            class = "visitation_model")
+                 call = call
+                 ),
+                class = "visitation_model")
 }
 
 

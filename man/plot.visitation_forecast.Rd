@@ -4,14 +4,43 @@
 \alias{plot.visitation_forecast}
 \title{visitation_forecast Plot Methods}
 \usage{
-\method{plot}{visitation_forecast}(x, type = c("fitted"), difference = FALSE, ...)
+\method{plot}{visitation_forecast}(
+  x,
+  difference = FALSE,
+  log_outputs = FALSE,
+  actual_visitation = NULL,
+  xlab = "Time",
+  ylab = "Fitted Value",
+  pred_color = "#228B22",
+  actual_color = "#FF0000",
+  size = 1.5,
+  main = "Forecasts for Visitation Model",
+  plot_points = FALSE,
+  ...
+)
 }
 \arguments{
-\item{x}{An object of class "decomposition".}
-
-\item{type}{A character string. One of "full","period", or "classical". If "full", the full reconstruction is plotted. If "period", the reconstruction of each period is plotted individually. If "classical", the trend and seasonality are plotted.}
+\item{x}{An object of class "visitation_forecast".}
 
 \item{difference}{A Boolean specifying whether to plot the original fit or differenced series. The default option is FALSE, in which case, the series is not differenced.}
+
+\item{log_outputs}{A Boolean specifying whether to plot the outputs in standard scale or the logged outputs}
+
+\item{actual_visitation}{A time series object representing the actual visitation in the standard scale}
+
+\item{xlab}{A String to overwrite the x label of the graph}
+
+\item{ylab}{A String to overwrite the y label of the graph}
+
+\item{pred_color}{A String to specify the color of the line for predicted visitation}
+
+\item{actual_color}{A String to specify the color of the line for actual visitation}
+
+\item{size}{A number representing the size of the line to plot.}
+
+\item{main}{A String to overwrite the main label of the graph}
+
+\item{plot_points}{A Boolean specifying whether to plot the individual points of visitation}
 
 \item{...}{Additional arguments.}
 }

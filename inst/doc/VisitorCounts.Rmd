@@ -4,7 +4,7 @@ output:
   rmarkdown::html_vignette:
     toc: true
 vignette: >
-  %\VignetteIndexEntry{VisitorCounts}
+  %\VignetteIndexEntry{national_park_analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -57,17 +57,17 @@ plot(log_flickr_userdays, main = "Log US Flickr user-days", ylab = "UD")
 # visitation_model()
 
 The `visitation_model()` function uses social media data, such as the log flickr photo-user-days in `log_yellowstone_pud`, coupled with a popularity measure of the social media platform, like the log US flickr userdays in `log_flickr_userdays`, to model percent changes in visitation counts.
-By default, `visitation_model()` assumes that no visitation counts are available, communicated in the parameter `ref_series = FALSE`. 
+By default, `visitation_model()` assumes that no visitation counts are available. 
 ```{r}
 yell_visitation_model <- visitation_model(log_yellowstone_pud,
-                                          log_flickr_userdays)
+                                          log_flickr_userdays, is_input_logged = TRUE)
 ```
 If national park data is available, a reference series may be supplied to assist in parameter estimates:
 
 ```{r}
 yell_visitation_model_nps <- visitation_model(log_yellowstone_pud,
                                               log_flickr_userdays,
-                                              ref_series = log_yellowstone_nps)
+                                              ref_series = log_yellowstone_nps, is_input_logged = TRUE)
 ```
 
 
@@ -93,8 +93,8 @@ upper_bound <- max(c(true_differences,diff(yell_visitation_model_nps$visitation_
 
 plot(yell_visitation_model_nps, ylim = c(lower_bound, upper_bound), 
      lwd = 2,
-     main = "Fitted Values for Visitation Model (NPS assisted)")
-lines(diff(log_yellowstone_nps), col = "red")
+     main = "Fitted Values for Visitation Model (NPS assisted)", difference = TRUE)
+lines(true_differences, col = "red")
 legend("bottom",c("Model Fit","True Differences"),col = c("black","red"),lty = c(1,1))
 ```
 

@@ -8,18 +8,18 @@ fit_model(
   parameter_estimates_and_time_series_windows,
   omit_trend,
   trend,
-  log_scale,
+  is_input_logged,
   ...
 )
 }
 \arguments{
-\item{parameter_estimates_and_time_series_windows}{# a list storing the outputs of `estimate_parameters`, including parameter estimates `beta` and `constant` as well as data pertaining to time series windows.}
+\item{parameter_estimates_and_time_series_windows}{# a list storing the outputs of \code{\link{estimate_parameters}}, including parameter estimates `constant`, `beta`, and `slope`, as well as data pertaining to time series windows.}
 
-\item{omit_trend}{This is obsolete and is left only for compatibility. A Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If}
+\item{omit_trend}{This is obsolete and is left only for compatibility. In other words, \code{trend} will overwrite any option chosen in \code{omit_trend}. If \code{trend} is NULL, then \code{trend} is overwritten according to \code{omit_trend}. It is a Boolean specifying whether or not to consider the trend component to be 0. The default option is TRUE, in which case, the trend component is 0. If it is set to FALSE, then it is estimated using data.}
 
 \item{trend}{A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.}
 
-\item{log_scale}{A Boolean specifying whether or not the results should be returned in the log scale.}
+\item{is_input_logged}{A Boolean describing whether the \code{onsite_usage}, \code{ref_series}, and \code{popularity_proxy} are in the log scale. The default option is FALSE, in which case the inputs will be assumed to not be logged and will be logged before making forecasts. Setting it to TRUE will assume the inputs are logged.}
 
 \item{...}{Additional arguments}
 }

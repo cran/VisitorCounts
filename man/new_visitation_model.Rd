@@ -26,11 +26,11 @@ new_visitation_model(
 
 \item{differenced_fit}{A time series storing the differenced fitted values of the visitation model.}
 
-\item{beta}{Seasonality adjustment factor.}
+\item{beta}{Seasonality adjustment factor. (beta_1)}
 
-\item{constant}{A numeric describing the constant term used in the model.}
+\item{constant}{A numeric describing the constant term used in the model. (beta_0)}
 
-\item{slope}{A numeric describing the slope term used in the model when trend is set to "linear".}
+\item{slope}{A numeric describing the slope term used in the model when trend is set to "linear". (beta_2)}
 
 \item{lag_estimate}{An integer representing the lag parameter for the model fit.}
 

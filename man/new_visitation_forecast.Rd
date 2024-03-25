@@ -6,6 +6,9 @@
 \usage{
 new_visitation_forecast(
   forecasts,
+  logged_forecasts,
+  differenced_logged_forecasts,
+  differenced_standard_forecasts,
   n_ahead,
   proxy_forecasts,
   onsite_usage_forecasts,
@@ -18,7 +21,13 @@ new_visitation_forecast(
 )
 }
 \arguments{
-\item{forecasts}{A time series of forecasts for the visitation model.}
+\item{forecasts}{A time series of forecasts for the visitation model. the forecasts will be in the standard scale of visitors per month}
+
+\item{logged_forecasts}{A time series of the logged forecasts for the visitation model.}
+
+\item{differenced_logged_forecasts}{A time series of the differenced logged forecasts  for the visitation model.}
+
+\item{differenced_standard_forecasts}{A time series of the exponentiated differenced logged forecasts that are for the visitation model.}
 
 \item{n_ahead}{An integer describing the number of forecasts made.}
 
@@ -26,11 +35,11 @@ new_visitation_forecast(
 
 \item{onsite_usage_forecasts}{A time series of forecasts of the original time series.}
 
-\item{beta}{A numeric or a character string specifying the seasonality adjustment factor.}
+\item{beta}{A numeric or a character string specifying the seasonality adjustment factor. (beta_1)}
 
-\item{constant}{A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series.}
+\item{constant}{A numeric specifying the constant term in the model. This constant is understood as the mean of the trend-adjusted time_series. (beta_0)}
 
-\item{slope}{A numeric specifying the slope term in the model when a linear trend is assumed.}
+\item{slope}{A numeric specifying the slope term in the model when a linear trend is assumed. (beta_2)}
 
 \item{criterion}{One of "MSE" or "Nonparametric", to specify the criterion used to select the lag.}
 
@@ -39,6 +48,8 @@ new_visitation_forecast(
 \item{lag_estimate}{A numeric value specifying the estimated lag in the visitation model.}
 }
 \value{
+Object of class "labeled_visitation_forecast".
+
 Object of class "Visitation_forecast".
 }
 \description{

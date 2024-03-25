@@ -8,7 +8,6 @@
   object,
   n_ahead,
   only_new = TRUE,
-  difference = FALSE,
   past_observations = c("fitted", "reference"),
   ...
 )
@@ -19,8 +18,6 @@
 \item{n_ahead}{An integer indicating how many observations to forecast.}
 
 \item{only_new}{A Boolean specifying whether to include only the forecasts (if TRUE) or the full reconstruction (if FALSE). The default option is TRUE.}
-
-\item{difference}{A Boolean specifying whether to forecast differences (if TRUE) or the original series (if FALSE). The default option is FALSE.}
 
 \item{past_observations}{A character string; one of "fitted" or "reference". Here, "fitted" uses the fitted values of the visitation model, while "reference" uses values supplied in `ref_series'.}
 
@@ -57,10 +54,10 @@ nps_ts <- log(nps_ts)
 popularity_proxy <- log(flickr_userdays)
 
 vm <- visitation_model(pud_ts,popularity_proxy, ref_series = nps_ts, trend = "linear")
-predict_vm <- predict(vm,n_ahead, difference = TRUE,
+predict_vm <- predict(vm,n_ahead,
                       only_new = FALSE, past_observations = "reference")
-plot(predict_vm, difference = FALSE)
-predict_vm2 <- predict(vm,n_ahead, difference = TRUE,
+plot(predict_vm, )
+predict_vm2 <- predict(vm,n_ahead,
                        only_new = FALSE, past_observations = "reference")
-plot(predict_vm2, difference = FALSE)
+plot(predict_vm2)
 }

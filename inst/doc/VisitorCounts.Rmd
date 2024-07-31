@@ -60,14 +60,14 @@ The `visitation_model()` function uses social media data, such as the log flickr
 By default, `visitation_model()` assumes that no visitation counts are available. 
 ```{r}
 yell_visitation_model <- visitation_model(log_yellowstone_pud,
-                                          log_flickr_userdays, is_input_logged = TRUE)
+                                          log_flickr_userdays, is_output_logged = TRUE, is_input_logged = TRUE)
 ```
 If national park data is available, a reference series may be supplied to assist in parameter estimates:
 
 ```{r}
 yell_visitation_model_nps <- visitation_model(log_yellowstone_pud,
                                               log_flickr_userdays,
-                                              ref_series = log_yellowstone_nps, is_input_logged = TRUE)
+                                              ref_series = log_yellowstone_nps, is_output_logged = TRUE, is_input_logged = TRUE)
 ```
 
 
@@ -126,10 +126,10 @@ Forecasts can be plotted using `plot.visitation_forecast()`:
 
 ```{r, fig.width = 7, fig.height = 5}
 plot(yellowstone_visitation_forecasts, difference = TRUE)
-plot(yellowstone_visitation_forecasts_nps, main = "Forecasts for Visitation Model (NPS Assisted)")
+plot(yellowstone_visitation_forecasts_nps, main = "Forecasts for Visitation Model (NPS Assisted)", date_label = "%b", date_breaks = "1 month")
 
 
-plot(yellowstone_visitation_forecasts_withpast, difference = TRUE)
+plot(yellowstone_visitation_forecasts_withpast, difference = TRUE, date_breaks = "1 year", date_label = "%y")
 ```
 
 

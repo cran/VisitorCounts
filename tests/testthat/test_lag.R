@@ -1,3 +1,4 @@
+context("obtaining correct lags")
 library(VisitorCounts)
 library(testthat)
 

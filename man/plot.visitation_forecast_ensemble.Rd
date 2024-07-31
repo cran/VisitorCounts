@@ -2,7 +2,7 @@
 % Please edit documentation in R/methods_plot.R
 \name{plot.visitation_forecast_ensemble}
 \alias{plot.visitation_forecast_ensemble}
-\title{visitation_forecast_ensemble Plot Methods}
+\title{visitation_model visitation_forecast_ensemble plot Methods}
 \usage{
 \method{plot}{visitation_forecast_ensemble}(
   x,
@@ -19,86 +19,49 @@
   size = 1.5,
   main = "Forecasts for Visitation Model",
   plot_points = FALSE,
+  date_breaks = "1 month",
+  date_labels = "\%y \%b",
   ...
 )
 }
 \arguments{
-\item{x}{An object of class "visitation_forecast_ensemble".}
+\item{x}{An object of class visitation_forecast_ensemble.}
 
 \item{difference}{A Boolean specifying whether to plot the original fit or differenced series. The default option is FALSE, in which case, the series is not differenced.}
 
-\item{log_outputs}{A Boolean specifying whether to plot the outputs in standard scale or the logged outputs}
+\item{log_outputs}{whether to log the outputted forecasts or not}
 
-\item{plot_cumsum}{A Boolean specifying whether to plot the cumsum of the outputs}
+\item{plot_cumsum}{whether to plot the cumulative sum or not}
 
-\item{plot_percent_change}{A Boolean specifying whether to plot the percent change of the outputs}
+\item{plot_percent_change}{whether to plot the percent change or not}
 
-\item{actual_visitation}{A time series object representing the actual visitation in the standard scale}
+\item{actual_visitation}{A timeseries object representing the actual visitation that will be plotted along site the visitation_forecast object}
 
-\item{actual_visitation_label}{A Label for the actual visitation in the legend}
+\item{actual_visitation_label}{a string that will be used for the label of the actual visitation.}
 
-\item{xlab}{A String to overwrite the x label of the graph}
+\item{xlab}{A string that will be used for the xlabel of the plot}
 
-\item{ylab}{A String to overwrite the y label of the graph}
+\item{ylab}{A string that will be used for the ylabel of the plot}
 
-\item{pred_colors}{An array of strings specifying the colors for the predicted outputs.}
+\item{pred_colors}{an array of Strings that will be used for the predicted series colors of the plot}
 
-\item{actual_color}{A String to specify the color of the line for actual visitation}
+\item{actual_color}{a String that will be used for the actual series color of the plot,}
 
-\item{size}{A number representing the size of the line to plot.}
+\item{size}{A number that represents the thickness of the lines being plotted}
 
-\item{main}{A String to overwrite the main label of the graph}
+\item{main}{A string that will be used for the title of the plot}
 
-\item{plot_points}{A Boolean specifying whether to plot the individual points of visitation}
+\item{plot_points}{a boolean to specify if the plot should be points or continous line.}
 
-\item{...}{Additional arguments.}
+\item{date_breaks}{A string to represent the distance between dates that the x-axis should be in. ex "1 month", "1 year"}
+
+\item{date_labels}{A string to represent the format of the x-axis time labels.}
+
+\item{...}{extra arguments to pass in}
+}
+\value{
+No return value, called for plotting objects of the class "visitation_forecast".
 }
 \description{
-Methods for plotting objects of the class "visitation_forecast_ensemble".
-}
-\examples{
-data("park_visitation")
-data("flickr_userdays")
-YELL_data <- park_visitation[park_visitation$park == "YELL",]
-YELL_data
-
-YELL_PUD <- YELL_data$pud #PUD Data
-YELL_NPS <- YELL_data$nps #NPS Data
-
-#The YELL data from 2005 through 2016 are used as the training data.
-YELL_data[1:144,]$date
-YELL_PUD.train <- ts(YELL_PUD[1:144], start = c(2005,1), end = c(2016,12), freq = 12)
-YELL_NPS.train <- ts(YELL_NPS[1:144], start = c(2005,1), end = c(2016,12), freq = 12)
-
-
-YELL_NPS.test <- ts(YELL_NPS[144:length(YELL_NPS)],
-                   start = c(2016,12), end = c(2017,12), freq = 12)
-
-#Construct models without linear trend (with or without OSC).
-YELL_model.without_trend <- visitation_model(onsite_usage = YELL_PUD.train,
-                                             ref_series = YELL_NPS.train,
-                                             parameter_estimates = "joint", trend = "none")
-
-YELL_model.without_trend_and_NPS <- visitation_model(onsite_usage = YELL_PUD.train,
-                                                     ref_series = NULL)
-
-YELL_pred.without_trend <- predict(YELL_model.without_trend,n_ahead = 12)
-YELL_pred.without_trend_and_NPS <- predict(YELL_model.without_trend_and_NPS, n_ahead = 12)
-YELL_NPS.test
-
-
-
-forecast_ensemble <- new_visitation_forecast_ensemble(list(YELL_pred.without_trend ,
-YELL_pred.without_trend_and_NPS), list("Without Trend", "Without Trend and NPS"))
-
-#Plot the forecasts and actual percent changes for 2017.
-plot(forecast_ensemble, actual_visitation = YELL_NPS.test,
-     ylab = "Percent Change in Monthly Visitation", main = "Forecast vs. 
-Actual Monthly Percent Change in Visitation in 2017", plot_percent_change = TRUE)
-
-
-#Plot the cumulative forecasts and actual cumulative percent changes for 2017.
-plot(forecast_ensemble, actual_visitation = YELL_NPS.test,
-     ylab = "Cumulative Percent Change in Monthly Visitation", 
-main = "Forecast vs. Actual Monthly Percent Change in Visitation in 2017", plot_cumsum = TRUE)
+Method for plotting forecast ensemble.
 }

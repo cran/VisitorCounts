@@ -5,7 +5,7 @@
 #' @param grouping_matrix A matrix containing information about the locations of the eigenvalue groups for each period in suspected_periods and trend component. The locations are indicated by '1'.
 #' @param window_length A numeric indicating the window length.
 #' @param ts_ssa An object of the class "ssa".
-#' @importFrom methods is
+#'
 #' @return  A list of the class "decomposition".
 #'
 #'
@@ -25,12 +25,11 @@ new_decomposition <- function(reconstruction_list,
 
 
 #' @title visitation_forecast_ensemble Class
-#' @description Class for plotting an array of visitation_foreces
+#' @description Class for plotting an array of visitation_forecast objects
+#' @importFrom methods is
 #' @export
 #' @param visitation_forecasts An array of  visitation_forecast object
 #' @param labels An array of  labels associated with visitation_forecast
-#' @importFrom methods is
-
 
 new_visitation_forecast_ensemble  <- function(visitation_forecasts, labels){
   if (!is.list(visitation_forecasts) ) {stop("visitation_forecasts must be a list of visitation_forecast objects") }
@@ -70,16 +69,17 @@ new_visitation_forecast_ensemble  <- function(visitation_forecasts, labels){
 
 #' @title labeled_visitation_forecast Class
 #' @description Class for visitation_model predictions (for use with predict.visitation_model()).
+#' @importFrom methods is
 #' @export
 #' @param visitation_forecast A visitation_forecast object
 #' @param label A character string of the label of forecast
-#' @importFrom methods is
+
 
 label_visitation_forecast <- function(visitation_forecast, label){
-                       
-  if(!is(visitation_forecast,"visitation_forecast")) stop("visitation_forecast must be a visitation_forecast object")
+
+  if (!is(visitation_forecast,"visitation_forecast")) stop("visitation_forecast must be a visitation_forecast object")
   if (!is.character(label)) stop("label must be a string")
-  
+
   structure(list(
                  visitation_forecast = visitation_forecast,
                  label = label), class = "labeled_visitation_forecast")
@@ -93,7 +93,7 @@ label_visitation_forecast <- function(visitation_forecast, label){
 #' @description Class for visitation_model predictions (for use with predict.visitation_model()).
 #' @export
 #' @param forecasts A time series of forecasts for the visitation model. the forecasts will be in the standard scale of visitors per month
-#' @param logged_forecasts A time series of the logged forecasts for the visitation model. 
+#' @param logged_forecasts A time series of the logged forecasts for the visitation model.
 #' @param differenced_logged_forecasts A time series of the differenced logged forecasts  for the visitation model.
 #' @param differenced_standard_forecasts A time series of the exponentiated differenced logged forecasts that are for the visitation model.
 #' @param n_ahead An integer describing the number of forecasts made.
@@ -111,7 +111,7 @@ label_visitation_forecast <- function(visitation_forecast, label){
 
 
 new_visitation_forecast <- function(forecasts,
-                                    logged_forecasts, 
+                                    logged_forecasts,
                                     differenced_logged_forecasts,
                                     differenced_standard_forecasts,
                                     n_ahead,
@@ -130,8 +130,8 @@ new_visitation_forecast <- function(forecasts,
   if (!is.numeric(n_ahead)) stop("n_ahead must be numeric")
   if (!is.list(onsite_usage_forecasts)) stop("time_series_forecasts must be a list")
   structure(list(forecasts = forecasts,
-                 logged_forecasts = logged_forecasts, 
-                 differenced_logged_forecasts = differenced_logged_forecasts, 
+                 logged_forecasts = logged_forecasts,
+                 differenced_logged_forecasts = differenced_logged_forecasts,
                  differenced_standard_forecasts  = differenced_standard_forecasts,
                  n_ahead = n_ahead,
                  proxy_forecasts = proxy_forecasts,

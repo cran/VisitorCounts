@@ -19,7 +19,7 @@ fit_model(
 
 \item{trend}{A character string specifying how the trend is modeled. Can be any of NULL, "linear", "none", and "estimated", where "none" and "estimated" correspond to \code{omit_trend} being TRUE and FALSE, respectively. If NULL, then it follows the value specified in \code{omit_trend}.}
 
-\item{is_input_logged}{A Boolean describing whether the \code{onsite_usage}, \code{ref_series}, and \code{popularity_proxy} are in the log scale. The default option is FALSE, in which case the inputs will be assumed to not be logged and will be logged before making forecasts. Setting it to TRUE will assume the inputs are logged.}
+\item{is_input_logged}{a Boolean specifying if the input is logged or not.}
 
 \item{...}{Additional arguments}
 }

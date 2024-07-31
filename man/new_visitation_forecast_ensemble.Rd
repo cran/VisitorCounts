@@ -12,5 +12,5 @@ new_visitation_forecast_ensemble(visitation_forecasts, labels)
 \item{labels}{An array of  labels associated with visitation_forecast}
 }
 \description{
-Class for plotting an array of visitation_foreces
+Class for plotting an array of visitation_forecast objects
 }

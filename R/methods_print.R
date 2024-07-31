@@ -71,12 +71,12 @@ print.decomposition <- function(x,...){
 
 print.visitation_forecast <- function(x,...){
 
-  # Note 
+  # Note
   #   The constant corresponds to the beta_0 in our model
   #   The beta parameter corresponds to the beta_1 coefficient in our model
   #   The slope (calculated only when we're estimating trend ) is the corresponding beta_2 in our model
-  beta_0 <- round(x$constant,3) 
-  beta_1 <- round(x$beta,3) 
+  beta_0 <- round(x$constant,3)
+  beta_1 <- round(x$beta,3)
   beta_2 <- round(x$slope,3)
   n_forecast <- x$n_ahead
   criterion <- x$criterion
@@ -122,7 +122,7 @@ print.visitation_forecast <- function(x,...){
 
 print.visitation_model <- function(x,...){
 
-  # Note 
+  # Note
   #   The constant corresponds to the beta_0 in our model
   #   The beta parameter corresponds to the beta_1 coefficient in our model
   #   The slope (calculated only when we're estimating trend ) is the corresponding beta_2 in our model

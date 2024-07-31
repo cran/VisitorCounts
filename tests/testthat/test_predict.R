@@ -1,5 +1,7 @@
+context("prediction of forecast")
 
 library(VisitorCounts)
+library(testthat)
 
 #A time series representing the logged values for the popularity on social media Flickr. 
 log_gtrends_popularity <- c(1.098612, 1.386294, 2.197225, 1.791759, 2.197225, 2.397895, 2.564949, 2.772589, 2.708050, 2.772589, 2.995732, 2.944439,
@@ -32,9 +34,8 @@ check_trend_forecasts <- function(park_visitation, park,popularity_proxy,n_ahead
 
 
   #create visitation model
-
-   suppressWarnings(vm <- visitation_model(pud_ts,popularity_proxy, omit_trend = FALSE, trend = "estimated", is_input_logged = TRUE))
-  suppressWarnings(predict_vm <- predict(vm, n_ahead, difference = TRUE, only_new = TRUE))
+  vm <- visitation_model(pud_ts,popularity_proxy, omit_trend = FALSE, trend = "estimated", is_output_logged= TRUE, is_input_logged = TRUE)
+  predict_vm <- predict(vm,n_ahead, difference = TRUE, only_new = TRUE)
 
   n_forecasts_needed <- n_ahead+vm$forecasts_needed #The number of forecasts we need from a prediction using the popularity proxy
 
@@ -82,11 +83,11 @@ test_that("predict.visitation_model predicts proxy trend as expected", {
   n_ahead <- 12
 
   for(i in seq_along(test_parks)){
-   
+
   check_trend_forecasts(park_visitation,test_parks[[i]],log_gtrends_popularity,n_ahead)
   check_trend_forecasts(park_visitation,test_parks[[i]],log(flickr_userdays),n_ahead)
 
-      }
+  }
 
 }
 )

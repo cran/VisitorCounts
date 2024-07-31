@@ -28,7 +28,7 @@ check_arguments(
 
 \item{ref_series}{A numeric vector specifying the original visitation series. The default option is NULL, implying that no such series is available. If such series is available, then its length must be the same as that of \code{onsite_usage}.}
 
-\item{is_input_logged}{A Boolean describing whether the \code{onsite_usage}, \code{ref_series}, and \code{popularity_proxy} are in the log scale. The default option is FALSE, in which case the inputs will be assumed to not be logged and will be logged before making forecasts. Setting it to TRUE will assume the inputs are logged.}
+\item{is_input_logged}{A boolean specifying if the input is logged or not}
 
 \item{...}{Additional arguments.}
 }

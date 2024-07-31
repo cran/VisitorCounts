@@ -25,12 +25,12 @@ plot(log_flickr_userdays, main = "Log US Flickr user-days", ylab = "UD")
 
 ## -----------------------------------------------------------------------------
 yell_visitation_model <- visitation_model(log_yellowstone_pud,
-                                          log_flickr_userdays, is_input_logged = TRUE)
+                                          log_flickr_userdays, is_output_logged = TRUE, is_input_logged = TRUE)
 
 ## -----------------------------------------------------------------------------
 yell_visitation_model_nps <- visitation_model(log_yellowstone_pud,
                                               log_flickr_userdays,
-                                              ref_series = log_yellowstone_nps, is_input_logged = TRUE)
+                                              ref_series = log_yellowstone_nps, is_output_logged = TRUE, is_input_logged = TRUE)
 
 ## ----fig.width = 7, fig.height = 5--------------------------------------------
 true_differences <- diff(log_yellowstone_nps)
@@ -64,10 +64,10 @@ yellowstone_visitation_forecasts_withpast <- predict(yell_visitation_model, n_ah
 
 ## ----fig.width = 7, fig.height = 5--------------------------------------------
 plot(yellowstone_visitation_forecasts, difference = TRUE)
-plot(yellowstone_visitation_forecasts_nps, main = "Forecasts for Visitation Model (NPS Assisted)")
+plot(yellowstone_visitation_forecasts_nps, main = "Forecasts for Visitation Model (NPS Assisted)", date_label = "%b", date_breaks = "1 month")
 
 
-plot(yellowstone_visitation_forecasts_withpast, difference = TRUE)
+plot(yellowstone_visitation_forecasts_withpast, difference = TRUE, date_breaks = "1 year", date_label = "%y")
 
 ## -----------------------------------------------------------------------------
 summary(yellowstone_visitation_forecasts)

@@ -16,33 +16,39 @@
   size = 1.5,
   main = "Forecasts for Visitation Model",
   plot_points = FALSE,
+  date_breaks = "1 month",
+  date_labels = "\%y \%b",
   ...
 )
 }
 \arguments{
-\item{x}{An object of class "visitation_forecast".}
+\item{x}{An object of the "visitation_forecast" class.}
 
-\item{difference}{A Boolean specifying whether to plot the original fit or differenced series. The default option is FALSE, in which case, the series is not differenced.}
+\item{difference}{A boolean to plot the differenced series.}
 
-\item{log_outputs}{A Boolean specifying whether to plot the outputs in standard scale or the logged outputs}
+\item{log_outputs}{A boolean to plot the logged outputs of the forecast.}
 
-\item{actual_visitation}{A time series object representing the actual visitation in the standard scale}
+\item{actual_visitation}{A timeseries object representing the actual visitation that will be plotted along site the visitation_forecast object.}
 
-\item{xlab}{A String to overwrite the x label of the graph}
+\item{xlab}{A string that will be used for the xlabel of the plot.}
 
-\item{ylab}{A String to overwrite the y label of the graph}
+\item{ylab}{A string that will be used for the ylabel of the plot.}
 
-\item{pred_color}{A String to specify the color of the line for predicted visitation}
+\item{pred_color}{a String that will be used for the predicted series color of the plot.}
 
-\item{actual_color}{A String to specify the color of the line for actual visitation}
+\item{actual_color}{a String that will be used for the actual series color of the plot.}
 
-\item{size}{A number representing the size of the line to plot.}
+\item{size}{A number that represents the thickness of the lines being plotted.}
 
-\item{main}{A String to overwrite the main label of the graph}
+\item{main}{A string that will be used for the title of the plot.}
 
-\item{plot_points}{A Boolean specifying whether to plot the individual points of visitation}
+\item{plot_points}{a boolean to specify if the plot should be points or continous line.}
 
-\item{...}{Additional arguments.}
+\item{date_breaks}{A string to represent the distance between dates that the x-axis should be in. ex "1 month", "1 year".}
+
+\item{date_labels}{A string to represent the format of the x-axis time labels. ex}
+
+\item{...}{extra arguments to pass in}
 }
 \value{
 No return value, called for plotting objects of the class "visitation_forecast".

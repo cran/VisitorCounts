@@ -129,28 +129,23 @@ plot.decomposition <- function(x, type = c("full","period","classical"), legend 
 
 #' @title visitation_forecast Plot Methods
 #' @description Methods for plotting objects of the class "visitation_forecast".
-#' @import graphics
-#' @importFrom methods hasArg
 #' @import ggplot2
 #' @export
-#' @param x An object of class "visitation_forecast".
-#' @param difference A Boolean specifying whether to plot the original fit or differenced series. The default option is FALSE, in which case, the series is not differenced.
-#' @param log_outputs A Boolean specifying whether to plot the outputs in standard scale or the logged outputs
-#' @param actual_visitation A time series object representing the actual visitation in the standard scale
-#' @param plot_points A Boolean specifying whether to plot the individual points of visitation
-#' @param xlab A String to overwrite the x label of the graph
-#' @param ylab A String to overwrite the y label of the graph
-#' @param main A String to overwrite the main label of the graph
-#' @param pred_color A String to specify the color of the line for predicted visitation
-#' @param actual_color A String to specify the color of the line for actual visitation
-#' @param size A number representing the size of the line to plot. 
-
-
-
-#' @param ... Additional arguments.
-#'
+#' @param x An object of the "visitation_forecast" class.
+#' @param difference A boolean to plot the differenced series.
+#' @param log_outputs A boolean to plot the logged outputs of the forecast.
+#' @param actual_visitation A timeseries object representing the actual visitation that will be plotted along site the visitation_forecast object.
+#' @param xlab A string that will be used for the xlabel of the plot.
+#' @param ylab A string that will be used for the ylabel of the plot.
+#' @param pred_color a String that will be used for the predicted series color of the plot.
+#' @param actual_color a String that will be used for the actual series color of the plot.
+#' @param size A number that represents the thickness of the lines being plotted.
+#' @param main A string that will be used for the title of the plot.
+#' @param plot_points a boolean to specify if the plot should be points or continous line.
+#' @param date_breaks A string to represent the distance between dates that the x-axis should be in. ex "1 month", "1 year".
+#' @param date_labels A string to represent the format of the x-axis time labels. ex
+#' @param ... extra arguments to pass in
 #' @return No return value, called for plotting objects of the class "visitation_forecast".
-#'
 #' @examples
 #' #' #Example:
 #'
@@ -167,14 +162,11 @@ plot.decomposition <- function(x, type = c("full","period","classical"), legend 
 #' vf <- predict(mf,12, only_new = TRUE)
 #' plot(vf)
 
-#
-plot.visitation_forecast <- function(x, difference = FALSE, log_outputs = FALSE, actual_visitation = NULL, xlab = "Time", ylab = "Fitted Value", pred_color = "#228B22", actual_color = "#FF0000", size = 1.5, main = "Forecasts for Visitation Model", plot_points = FALSE, ...){
-
+plot.visitation_forecast <- function(x, difference = FALSE, log_outputs = FALSE, actual_visitation = NULL, xlab = "Time", ylab = "Fitted Value", pred_color = "#228B22", actual_color = "#FF0000", size = 1.5, main = "Forecasts for Visitation Model", plot_points = FALSE, date_breaks ="1 month", date_labels = "%y %b", ...){
   series_to_plot <- x$forecasts
-  y<-NULL
-  group <-NULL
+
   if(log_outputs)
-  { 
+  {
     if(difference)
     {
       ylab <- paste(ylab,"(differenced)")
@@ -197,7 +189,7 @@ plot.visitation_forecast <- function(x, difference = FALSE, log_outputs = FALSE,
 
  actual_visitation_data_frame <-NULL
  plot_actual_visitation <- FALSE
- data_frame_to_plot <-fortify(series_to_plot, is.date = TRUE) #need to convert ts objec to a dataframe
+ data_frame_to_plot <-convert_ts_forecast_to_df(series_to_plot) #need to convert ts objec to a dataframe
  data_frame_to_plot$group <- rep("forecast", length(data_frame_to_plot$x))
 
 if(!is.null(actual_visitation))
@@ -221,7 +213,7 @@ if(!is.null(actual_visitation))
       }
     }
 
-    actual_visitation_data_frame  <-fortify(actual_visitation, is.date = TRUE)
+    actual_visitation_data_frame  <-convert_ts_forecast_to_df(actual_visitation)
     actual_visitation_data_frame$group <- rep("actual", length(actual_visitation_data_frame$x))
     data_frame_to_plot<-rbind(data_frame_to_plot,actual_visitation_data_frame)
   }
@@ -231,10 +223,22 @@ if(!is.null(actual_visitation))
   }
 }
 
- ggplot(data=data_frame_to_plot, aes( x = x, y = y,color = group)) + geom_line(size = size) + theme_bw() +labs(y= ylab, x = xlab, title = main)+theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", legend.direction = "horizontal", axis.text.x = element_text( size=13), axis.text.y = element_text(size=13)) + {if(plot_points)geom_point(size = 3)} +
- scale_x_continuous(breaks = round(seq(min(data_frame_to_plot$x), max(data_frame_to_plot$x), by = ((max(data_frame_to_plot$x) - min(data_frame_to_plot$x))/10)),1))+ {scale_color_manual(label = "", values = c("forecast" = pred_color, "actual" = actual_color))} 
+ ggplot(data=data_frame_to_plot, aes_string(x ='x', y = 'y',color = 'group')) + geom_line(size = size) + theme_bw() +labs(y= ylab, x = xlab, title = main)+theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", legend.direction = "horizontal", axis.text.x = element_text( size=9), axis.text.y = element_text(size=13)) + {if(plot_points)geom_point(size = 3)} +
+ scale_x_continuous(breaks = round(seq(min(data_frame_to_plot$x), max(data_frame_to_plot$x), by = 0.1),1))+ {scale_color_manual(label = "", values = c("forecast" = pred_color, "actual" = actual_color))} + scale_x_date(date_breaks = date_breaks,date_labels = date_labels)
 
 }
+
+#' @title convert_ts_forecast_to_df
+#' @description method for converting a timerseries to a dataframe so that it can be plotted with ggplot2 and keep a Date x-axis.
+#' @import zoo
+#' @export
+#' @param forecast timeseries object to convert
+convert_ts_forecast_to_df <- function(forecast)
+{
+
+  return (data.frame(x=as.Date(as.yearmon(time(forecast)), frac=1), y = as.vector(forecast)))
+}
+
 
 construct_visitation_forecast_cumsum_df <- function(labeled_visitation_forecast)
 {
@@ -242,12 +246,11 @@ construct_visitation_forecast_cumsum_df <- function(labeled_visitation_forecast)
   visitation_forecast <- labeled_visitation_forecast$visitation_forecast
 
   forecast <- 100*(visitation_forecast$differenced_logged_forecasts)
-  forecast_df = fortify(forecast)
+  forecast_df = convert_ts_forecast_to_df(forecast)
+
   forecast_df$y <- cumsum(forecast_df$y)
   forecast_df$group <-rep(visitation_label, length(forecast_df$x))
-
   return (forecast_df)
-
 }
 
 construct_visitation_forecast_percent_change_df <-function(labeled_visitation_forecast)
@@ -256,9 +259,8 @@ construct_visitation_forecast_percent_change_df <-function(labeled_visitation_fo
   visitation_forecast <- labeled_visitation_forecast$visitation_forecast
 
   forecast <- 100*(visitation_forecast$differenced_logged_forecasts)
-  forecast_df = fortify(forecast)
+  forecast_df = convert_ts_forecast_to_df(forecast)
   forecast_df$group <-rep(visitation_label, length(forecast_df$x))
-
   return (forecast_df)
 }
 
@@ -267,11 +269,11 @@ construct_visitation_forecast_df <- function(labeled_visitation_forecast, differ
 
   label <- labeled_visitation_forecast$label
   visitation_forecast <-labeled_visitation_forecast$visitation_forecast
- 
+
   forecast <- visitation_forecast$forecasts
 
   if(log_outputs)
-  { 
+  {
     if(difference)
     {
       forecast <- visitation_forecast$differenced_logged_forecasts
@@ -285,16 +287,15 @@ construct_visitation_forecast_df <- function(labeled_visitation_forecast, differ
       forecast <- visitation_forecast$differenced_standard_forecasts
   }
 
- forecast_df = fortify(forecast)
+ forecast_df = convert_ts_forecast_to_df(forecast)
  forecast_df$group <- rep(label, length(forecast_df$x))
 
   return (forecast_df)
 }
 
-
 construct_actual_df <-function(actual_visitation_ts, difference, log_outputs, label, plot_cumsum = FALSE, plot_percent_change = FALSE )
 {
- 
+
   if(!is.null(actual_visitation_ts))
   {
     if(is.ts(actual_visitation_ts))
@@ -327,7 +328,7 @@ construct_actual_df <-function(actual_visitation_ts, difference, log_outputs, la
         actual_visitation_ts <-100*(actual_visitation_ts)
       }
 
-      actual_visitation_df  <-fortify(actual_visitation_ts)
+      actual_visitation_df  <-convert_ts_forecast_to_df(actual_visitation_ts)
 
       if(plot_cumsum)
       {
@@ -347,84 +348,32 @@ construct_actual_df <-function(actual_visitation_ts, difference, log_outputs, la
   return (list(x =c(), y = c(), group = c()))
 }
 
-
-#' @title visitation_forecast_ensemble Plot Methods
-#' @description Methods for plotting objects of the class "visitation_forecast_ensemble".
-#' @import graphics
-#' @importFrom methods hasArg
-#' @import ggplot2
+#' @title visitation_model visitation_forecast_ensemble plot Methods
+#' @description Method for plotting forecast ensemble.
 #' @export
-#' @param x An object of class "visitation_forecast_ensemble".
+#' @import ggplot2
+#' @param x An object of class visitation_forecast_ensemble.
 #' @param difference A Boolean specifying whether to plot the original fit or differenced series. The default option is FALSE, in which case, the series is not differenced.
-#' @param log_outputs A Boolean specifying whether to plot the outputs in standard scale or the logged outputs
-#' @param plot_cumsum A Boolean specifying whether to plot the cumsum of the outputs
-#' @param plot_percent_change A Boolean specifying whether to plot the percent change of the outputs
-#' @param actual_visitation A time series object representing the actual visitation in the standard scale
-#' @param actual_visitation_label A Label for the actual visitation in the legend
-#' @param plot_points A Boolean specifying whether to plot the individual points of visitation
-#' @param xlab A String to overwrite the x label of the graph
-#' @param ylab A String to overwrite the y label of the graph
-#' @param main A String to overwrite the main label of the graph
-#' @param pred_colors An array of strings specifying the colors for the predicted outputs.
-#' @param size A number representing the size of the line to plot. 
-#' @param actual_color A String to specify the color of the line for actual visitation
-#' @param ... Additional arguments.
-#' @examples
-#' data("park_visitation")
-#' data("flickr_userdays")
-#' YELL_data <- park_visitation[park_visitation$park == "YELL",]
-#' YELL_data
+#' @param log_outputs whether to log the outputted forecasts or not
+#' @param plot_cumsum whether to plot the cumulative sum or not
+#' @param plot_percent_change whether to plot the percent change or not
+#' @param actual_visitation A timeseries object representing the actual visitation that will be plotted along site the visitation_forecast object
+#' @param xlab A string that will be used for the xlabel of the plot
+#' @param ylab A string that will be used for the ylabel of the plot
+#' @param pred_colors an array of Strings that will be used for the predicted series colors of the plot
+#' @param actual_color a String that will be used for the actual series color of the plot,
+#' @param actual_visitation_label a string that will be used for the label of the actual visitation.
+#' @param size A number that represents the thickness of the lines being plotted
+#' @param main A string that will be used for the title of the plot
+#' @param plot_points a boolean to specify if the plot should be points or continous line.
+#' @param date_breaks A string to represent the distance between dates that the x-axis should be in. ex "1 month", "1 year"
+#' @param date_labels A string to represent the format of the x-axis time labels.
+#' @param ... extra arguments to pass in
+#' @return No return value, called for plotting objects of the class "visitation_forecast".
 #'
-#' YELL_PUD <- YELL_data$pud #PUD Data
-#' YELL_NPS <- YELL_data$nps #NPS Data
-#'
-#' #The YELL data from 2005 through 2016 are used as the training data.
-#' YELL_data[1:144,]$date
-#' YELL_PUD.train <- ts(YELL_PUD[1:144], start = c(2005,1), end = c(2016,12), freq = 12)
-#' YELL_NPS.train <- ts(YELL_NPS[1:144], start = c(2005,1), end = c(2016,12), freq = 12)
-#'
-#'
-#' YELL_NPS.test <- ts(YELL_NPS[144:length(YELL_NPS)],
-#'                    start = c(2016,12), end = c(2017,12), freq = 12)
-#'
-#' #Construct models without linear trend (with or without OSC).
-#' YELL_model.without_trend <- visitation_model(onsite_usage = YELL_PUD.train,
-#'                                              ref_series = YELL_NPS.train,
-#'                                              parameter_estimates = "joint", trend = "none")
-#'
-#' YELL_model.without_trend_and_NPS <- visitation_model(onsite_usage = YELL_PUD.train,
-#'                                                      ref_series = NULL)
-#'
-#' YELL_pred.without_trend <- predict(YELL_model.without_trend,n_ahead = 12)
-#' YELL_pred.without_trend_and_NPS <- predict(YELL_model.without_trend_and_NPS, n_ahead = 12)
-#' YELL_NPS.test
-#'
-#'
-#'
-#' forecast_ensemble <- new_visitation_forecast_ensemble(list(YELL_pred.without_trend ,
-#' YELL_pred.without_trend_and_NPS), list("Without Trend", "Without Trend and NPS"))
-#'
-#' #Plot the forecasts and actual percent changes for 2017.
-#' plot(forecast_ensemble, actual_visitation = YELL_NPS.test,
-#'      ylab = "Percent Change in Monthly Visitation", main = "Forecast vs. 
-#' Actual Monthly Percent Change in Visitation in 2017", plot_percent_change = TRUE)
-#'
-#'
-#' #Plot the cumulative forecasts and actual cumulative percent changes for 2017.
-#' plot(forecast_ensemble, actual_visitation = YELL_NPS.test,
-#'      ylab = "Cumulative Percent Change in Monthly Visitation", 
-#' main = "Forecast vs. Actual Monthly Percent Change in Visitation in 2017", plot_cumsum = TRUE)
-
-
-
-
-
-plot.visitation_forecast_ensemble<- function(x, difference = FALSE, log_outputs = FALSE, plot_cumsum = FALSE, plot_percent_change = FALSE, actual_visitation = NULL, actual_visitation_label = "Actual", xlab = "Time", ylab = "Fitted Value", pred_colors = c("#ff6361", "#58508d","#bc5090", "#003f5c" ), actual_color = "#ffa600", size = 1.5, main = "Forecasts for Visitation Model", plot_points = FALSE, ...)
+plot.visitation_forecast_ensemble<- function(x, difference = FALSE, log_outputs = FALSE, plot_cumsum = FALSE, plot_percent_change = FALSE, actual_visitation = NULL, actual_visitation_label = "Actual", xlab = "Time", ylab = "Fitted Value", pred_colors = c("#ff6361", "#58508d","#bc5090", "#003f5c" ), actual_color = "#ffa600", size = 1.5, main = "Forecasts for Visitation Model", plot_points = FALSE, date_breaks ="1 month", date_labels = "%y %b", ...)
 {
   forecasts <- x$forecast_ensemble
-  y <- NULL
-  group <- NULL #adding these placeholdesr because CRAN is dumb and thinks that aes() is using globals, but if you change the syntax to not get mad then ggplot starts throwing warnings I can't supress. So this will just have to do. 
-
 
   if(length(forecasts) > length(pred_colors))
   {
@@ -453,7 +402,7 @@ plot.visitation_forecast_ensemble<- function(x, difference = FALSE, log_outputs 
     {
       df_list[[i]] = construct_visitation_forecast_cumsum_df(forecasts[[i]])
     }
-    else 
+    else
     {
        df_list[[i]] = construct_visitation_forecast_df(forecasts[[i]], difference, log_outputs)
     }
@@ -462,41 +411,26 @@ plot.visitation_forecast_ensemble<- function(x, difference = FALSE, log_outputs 
 
   all_labels = c(all_labels, actual_visitation_label)
   pred_colors[[length(all_labels)]] = actual_color
-
-
   data_frame_to_plot<-do.call(rbind, df_list)
-
   data_frame_to_plot<-rbind(data_frame_to_plot, construct_actual_df(actual_visitation, difference, log_outputs, actual_visitation_label, plot_cumsum=plot_cumsum, plot_percent_change = plot_percent_change))
-
-  theme =  theme_gray()+ theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom",
-            legend.direction = "horizontal", axis.text.x = element_text( size=13), axis.text.y = element_text(size=13))
-
-  scale = scale_x_continuous(breaks = round(seq(min(data_frame_to_plot$x), max(data_frame_to_plot$x), by = ((max(data_frame_to_plot$x) - min(data_frame_to_plot$x))/10)),1))
-
-
-
+  theme =  ggplot2::theme_gray()+ theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom",
+            legend.direction = "horizontal", axis.text.x = element_text( size=9), axis.text.y = element_text(size=13))
+  scale = scale_x_continuous(breaks = round(seq(min(data_frame_to_plot$x),
+                                      max(data_frame_to_plot$x), by = 0.1),1))
   line = geom_line(size = 1.5)
-
   labels = labs(y= ylab, x = xlab,
       title = main)
-
   legend = {scale_color_manual(name = "",
           values = setNames(pred_colors,all_labels))}
-
   # plot the the frame
-
-  ggplot(data=data_frame_to_plot, aes(x = x, y = y, color = group))+ theme + scale + line + labels + legend
-
+  ggplot(data=data_frame_to_plot, aes_string(x ='x', y = 'y',color = 'group'))+ theme + scale + line + labels + legend +scale_x_date(date_breaks = date_breaks,date_labels = date_labels)
 }
-
-
 
 
 #' @title visitation_model Plot Methods
 #' @description Methods for plotting objects of the class "decomposition".
 #' @import graphics
 #' @importFrom methods hasArg
-#' @import ggplot2
 #' @export
 #' @param x An object of class "decomposition".
 #' @param type A character string. One of "full","period", or "classical". If "full", the full reconstruction is plotted. If "period", the reconstruction of each period is plotted individually. If "classical", the trend and seasonality are plotted.
@@ -525,7 +459,9 @@ plot.visitation_forecast_ensemble<- function(x, difference = FALSE, log_outputs 
 #' vm <- visitation_model(pud_ts,trend_proxy,ref_series = nps_ts)
 #' plot(vm)
 
+
 plot.visitation_model <- function(x, type = c("fitted"), difference = FALSE,...){
+
   type = match.arg(type)
 
   series_to_plot <- c()
@@ -534,7 +470,6 @@ plot.visitation_model <- function(x, type = c("fitted"), difference = FALSE,...)
     ylab <- "Fitted Value"
     main <- "Fitted values for visitation model"
   }
-
   if(difference){
     series_to_plot <- diff(series_to_plot)
     ylab <- paste(ylab," (differenced)")
@@ -552,4 +487,5 @@ plot.visitation_model <- function(x, type = c("fitted"), difference = FALSE,...)
   do.call(plot,presets)
 
 }
+
 

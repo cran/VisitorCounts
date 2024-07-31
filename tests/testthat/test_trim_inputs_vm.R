@@ -1,3 +1,4 @@
+context("check that we're trimming inputs and outputs correctly")
 
 library(VisitorCounts)
 library(testthat)

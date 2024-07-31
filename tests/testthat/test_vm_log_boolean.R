@@ -1,3 +1,4 @@
+context("is_input_logged && is_out_logged unit tests")
 
 library(VisitorCounts)
 library(testthat)
@@ -58,7 +59,7 @@ expect_equal(vm_1_predictions, vm_2_predictions)
 
 
 
-test_that("check is_input_logged is working as expected", {
+test_that("check is_logged_input and is_logged_output are working as expected", {
   #Proxy trend forecasts should consist of some number of past trend component values and some number of new ones.
 
    test_parks <- c("YELL","DEVA","EVER")
@@ -66,14 +67,12 @@ test_that("check is_input_logged is working as expected", {
   n_ahead <- 12
 
   for(i in seq_along(test_parks)){
- suppressWarnings(
-      {
+
     check_inputs_outputs_logged(park_visitation, test_parks[[i]], n_ahead, TRUE, TRUE)
 
     check_inputs_outputs_logged(park_visitation, test_parks[[i]], n_ahead, FALSE, TRUE)
 
     check_inputs_outputs_logged(park_visitation, test_parks[[i]], n_ahead, FALSE, FALSE)
-      })
 
   }
 

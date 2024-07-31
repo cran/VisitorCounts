@@ -40,7 +40,7 @@ estimate_parameters(
 
 \item{parameter_estimates}{A character string specifying how to estimate beta and constant parameters should a reference series be supplied. Both options use least squares estimates, but "separate" indicates that the differenced series should be used to estimate beta separately from the constant, while "joint" indicates to estimate both using non-differenced detrended series.}
 
-\item{is_input_logged}{A Boolean describing whether the \code{onsite_usage}, \code{ref_series}, and \code{popularity_proxy} are in the log scale. The default option is FALSE, in which case the inputs will be assumed to not be logged and will be logged before making forecasts. Setting it to TRUE will assume the inputs are logged.}
+\item{is_input_logged}{A boolean specifying if the input is logged or not}
 
 \item{...}{Additional arguments.}
 }

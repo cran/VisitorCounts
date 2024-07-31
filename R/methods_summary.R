@@ -70,7 +70,7 @@ summary.decomposition <- function(object,...){
 
 summary.visitation_forecast <- function(object,...){
 
-  # Note 
+  # Note
   #   The constant corresponds to the beta_0 in our model
   #   The beta parameter corresponds to the beta_1 coefficient in our model
   #   The slope (calculated only when we're estimating trend ) is the corresponding beta_2 in our model
@@ -123,7 +123,7 @@ summary.visitation_forecast <- function(object,...){
 
 
 summary.visitation_model <- function(object,...){
-  # Note 
+  # Note
   #   The constant corresponds to the beta_0 in our model
   #   The beta parameter corresponds to the beta_1 coefficient in our model
   #   The slope (calculated only when we're estimating trend ) is the corresponding beta_2 in our model

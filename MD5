@@ -1,6 +1,6 @@
-1cf6a9350bfc50ad54cdfdaac9b30ae2 *DESCRIPTION
+945ffefb5ae8be816d38eb32915a6c1e *DESCRIPTION
 106fd6b0412a6d8a8fe977219eef053f *NAMESPACE
-6eee62dc8ad41ad3935bb064ffea42fb *NEWS.md
+c4417dfa7fd1ff6bcd07e2e97a67d863 *NEWS.md
 1082e61927bb9afb10eedfbb286615c0 *R/classes.R
 0019f8b19d41c7106f2543172cd001ed *R/data.R
 b08d380a4295f46a18a64e7e190b0923 *R/function_auto_decompose.R
@@ -8,7 +8,7 @@ b894abe49ae7fbd496dd7f4e4778f5a6 *R/function_estimate_lag.R
 a10b4a4f44debc1063b7901fc606dfda *R/function_visitation_model.R
 8ed0092d0d69ea656438716d40ee300f *R/helpers_visitation_model.R
 4451de8165d68bc82bcb911911b76ce2 *R/methods_plot.R
-24616d015509beadb5e440dc26317982 *R/methods_predict.R
+cc24f7d31d932a2b8d6f5046ea57a17a *R/methods_predict.R
 34ac5445523a0deb7ae4dbbbbdc37aee *R/methods_print.R
 87df50c6a463c93dfeacbedff69df358 *R/methods_summary.R
 64882eaab18809d18d2af948cddd87fa *README.md
@@ -18,7 +18,7 @@ bb054d1b851f3e0dfa9808c76a91ef02 *data/forest_visitation.rda
 46a6f3fdc5de1d79eb0759fa7b944114 *data/park_visitation.rda
 d5c8519bab7136ffb0e8aeab41a229bf *inst/doc/VisitorCounts.R
 0f649288b47dfbff4419c70e1646628e *inst/doc/VisitorCounts.Rmd
-accd9790c450605c0b27bab5a9c07ca1 *inst/doc/VisitorCounts.html
+a010365107d2e1cdd24f18a7523ccf07 *inst/doc/VisitorCounts.html
 a9883a0c3edf9157e3aa67e774270330 *man/auto_decompose.Rd
 18353c34a8dac5ebd96722b6f77d1eba *man/check_arguments.Rd
 9a23d095b84c42f9e52cede4d2d97770 *man/convert_ts_forecast_to_df.Rd

@@ -1,7 +1,7 @@
 Package: VisitorCounts
 Type: Package
 Title: Modeling and Forecasting Visitor Counts Using Social Media
-Version: 2.0.1
+Version: 2.0.2
 Date: 2024-7-28
 Authors@R: c(
         person("Robert", "Bowen", email = "robertbowen.bham@gmail.com", role = c("aut", "cre")),
@@ -32,6 +32,6 @@ VignetteBuilder: knitr
 Depends: R (>= 3.5.0)
 LazyData: true
 NeedsCompilation: no
-Packaged: 2024-07-30 23:52:19 UTC; Admim
+Packaged: 2024-08-18 01:19:14 UTC; Admim
 Repository: CRAN
-Date/Publication: 2024-07-31 05:50:02 UTC
+Date/Publication: 2024-08-18 03:50:10 UTC

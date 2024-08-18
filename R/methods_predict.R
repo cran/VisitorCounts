@@ -70,7 +70,7 @@ predict.decomposition <- function(object,n_ahead,only_new = TRUE,...){
 
 
 #' @title Notify User prediction warning on constant is 0
-#' @description Notfy the user of details related to the outputs of the model being potentially inaccurate when constant of model is 0. 
+#' @description Notfy the user of details related to the outputs of the model being potentially inaccurate when constant of model is 0.
 #' @export
 #' @param constant The B_0 parameter of the model.
 #'
@@ -194,22 +194,24 @@ predict.visitation_model <- function(object,
     message("Reference series is NULL. Using fitted values instead.")
   }
 
+  forecasts_to_diff <- c(past_values[length(object$visitation_fit)], forecasts)
+
   if(!only_new){
     past <- past_values
     forecasts <- c(past,forecasts)
-  }
-  if(only_new){
-    past <- past_values[length(object$visitation_fit)] 
-    forecasts <- c(past,forecasts)
+    forecasts_to_diff <- forecasts
   }
 
+  forecasts_to_diff <-ts(forecasts_to_diff,
+                         end = time(object$visitation_fit)[length(object$visitation_fit)]+n_ahead/frequency(object$visitation_fit),
+                         frequency = frequency(object$visitation_fit))
   forecasts <-  ts(forecasts,
                    end = time(object$visitation_fit)[length(object$visitation_fit)]+n_ahead/frequency(object$visitation_fit),
                    frequency = frequency(object$visitation_fit))
 
 
   logged_forecasts <-forecasts
-  differenced_logged_forecasts <-diff(forecasts)
+  differenced_logged_forecasts <-diff(forecasts_to_diff)
   standard_forecasts <-exp(logged_forecasts)
   differenced_standard_forecasts <-exp(differenced_logged_forecasts)
 
@@ -226,7 +228,7 @@ predict.visitation_model <- function(object,
 
   return(new_visitation_forecast(
                                  logged_forecasts = logged_forecasts,
-                                 forecasts = standard_forecasts, 
+                                 forecasts = standard_forecasts,
                                  differenced_logged_forecasts = differenced_logged_forecasts,
                                  differenced_standard_forecasts = differenced_standard_forecasts,
                                  n_ahead = n_ahead,

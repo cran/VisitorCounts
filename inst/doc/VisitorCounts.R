@@ -77,10 +77,8 @@ summary(yellowstone_visitation_forecasts_nps)
 yell_pud_decomposition <- auto_decompose(yellowstone_pud)
 
 ## ----fig.width = 7, fig.height = 5--------------------------------------------
-plot(yell_pud_decomposition)
-
+plot(yell_pud_decomposition, type = "full")
 plot(yell_pud_decomposition, type = "period")
-
 plot(yell_pud_decomposition, type = "classical")
 
 ## -----------------------------------------------------------------------------

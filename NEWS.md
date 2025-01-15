@@ -3,6 +3,7 @@
 
 # VisitorCounts NEWS
 
-## VisitorCounts 2.0.2
+## VisitorCounts 2.0.3
 
-- Fixing bug where past values were being appended to forecasts. 
+- Creating s3methods for plotting visitation_model, visitation_forecast_ensemble, visitation_forecast, decomposition objects with ggplot. 
+

@@ -1,8 +1,8 @@
 Package: VisitorCounts
 Type: Package
 Title: Modeling and Forecasting Visitor Counts Using Social Media
-Version: 2.0.2
-Date: 2024-7-28
+Version: 2.0.3
+Date: 2025-1-13
 Authors@R: c(
         person("Robert", "Bowen", email = "robertbowen.bham@gmail.com", role = c("aut", "cre")),
         person("Russell", "Goebel", email = "rgoebel@bu.edu", role = "aut"),
@@ -26,12 +26,12 @@ Description: Performs modeling and forecasting of park visitor counts
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.3.2
-Imports: Rssa, methods, ggplot2, zoo
+Imports: Rssa, methods, ggplot2, zoo, cowplot
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 Depends: R (>= 3.5.0)
 LazyData: true
 NeedsCompilation: no
-Packaged: 2024-08-18 01:19:14 UTC; Admim
+Packaged: 2025-01-14 15:20:33 UTC; Admim
 Repository: CRAN
-Date/Publication: 2024-08-18 03:50:10 UTC
+Date/Publication: 2025-01-15 23:50:02 UTC

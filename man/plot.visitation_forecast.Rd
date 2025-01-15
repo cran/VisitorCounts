@@ -2,53 +2,18 @@
 % Please edit documentation in R/methods_plot.R
 \name{plot.visitation_forecast}
 \alias{plot.visitation_forecast}
-\title{visitation_forecast Plot Methods}
+\title{visitation_forecast Plot Method}
 \usage{
-\method{plot}{visitation_forecast}(
-  x,
-  difference = FALSE,
-  log_outputs = FALSE,
-  actual_visitation = NULL,
-  xlab = "Time",
-  ylab = "Fitted Value",
-  pred_color = "#228B22",
-  actual_color = "#FF0000",
-  size = 1.5,
-  main = "Forecasts for Visitation Model",
-  plot_points = FALSE,
-  date_breaks = "1 month",
-  date_labels = "\%y \%b",
-  ...
-)
+\method{plot}{visitation_forecast}(x, type = c("fitted"), difference = FALSE, ...)
 }
 \arguments{
-\item{x}{An object of the "visitation_forecast" class.}
+\item{x}{An object of class "decomposition".}
 
-\item{difference}{A boolean to plot the differenced series.}
+\item{type}{A character string. One of "full","period", or "classical". If "full", the full reconstruction is plotted. If "period", the reconstruction of each period is plotted individually. If "classical", the trend and seasonality are plotted.}
 
-\item{log_outputs}{A boolean to plot the logged outputs of the forecast.}
+\item{difference}{A Boolean specifying whether to plot the original fit or differenced series. The default option is FALSE, in which case, the series is not differenced.}
 
-\item{actual_visitation}{A timeseries object representing the actual visitation that will be plotted along site the visitation_forecast object.}
-
-\item{xlab}{A string that will be used for the xlabel of the plot.}
-
-\item{ylab}{A string that will be used for the ylabel of the plot.}
-
-\item{pred_color}{a String that will be used for the predicted series color of the plot.}
-
-\item{actual_color}{a String that will be used for the actual series color of the plot.}
-
-\item{size}{A number that represents the thickness of the lines being plotted.}
-
-\item{main}{A string that will be used for the title of the plot.}
-
-\item{plot_points}{a boolean to specify if the plot should be points or continous line.}
-
-\item{date_breaks}{A string to represent the distance between dates that the x-axis should be in. ex "1 month", "1 year".}
-
-\item{date_labels}{A string to represent the format of the x-axis time labels. ex}
-
-\item{...}{extra arguments to pass in}
+\item{...}{Additional arguments.}
 }
 \value{
 No return value, called for plotting objects of the class "visitation_forecast".

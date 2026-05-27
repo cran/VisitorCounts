@@ -1,8 +1,8 @@
 Package: VisitorCounts
 Type: Package
 Title: Modeling and Forecasting Visitor Counts Using Social Media
-Version: 2.0.3
-Date: 2025-1-13
+Version: 2.0.4
+Date: 2026-05-26
 Authors@R: c(
         person("Robert", "Bowen", email = "robertbowen.bham@gmail.com", role = c("aut", "cre")),
         person("Russell", "Goebel", email = "rgoebel@bu.edu", role = "aut"),
@@ -23,7 +23,7 @@ Description: Performs modeling and forecasting of park visitor counts
 	from which short-term forecasts of the visitor counts and percent changes
 	in the visitor counts can be made. A reference for the underlying model that 'VisitorCounts' uses can be found at 
     Russell Goebel, Austin Schmaltz, Beth Ann Brackett, Spencer A. Wood, Kimihiro Noguchi (2023) <doi:10.1002/for.2965> .
-License: GPL-3
+License: MIT + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 Imports: Rssa, methods, ggplot2, zoo, cowplot
@@ -32,6 +32,6 @@ VignetteBuilder: knitr
 Depends: R (>= 3.5.0)
 LazyData: true
 NeedsCompilation: no
-Packaged: 2025-01-14 15:20:33 UTC; Admim
+Packaged: 2026-05-27 04:18:57 UTC; Admim
 Repository: CRAN
-Date/Publication: 2025-01-15 23:50:02 UTC
+Date/Publication: 2026-05-27 06:10:03 UTC

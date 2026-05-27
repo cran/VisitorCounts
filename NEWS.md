@@ -3,6 +3,10 @@
 
 # VisitorCounts NEWS
 
+## VisitorCounts 2.0.4
+
+- Relicensed from GPL-3 to MIT.
+
 ## VisitorCounts 2.0.3
 
 - Creating s3methods for plotting visitation_model, visitation_forecast_ensemble, visitation_forecast, decomposition objects with ggplot. 
